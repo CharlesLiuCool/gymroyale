@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA-tmqcoLEh_uhNtHNuEFhcuq8Os4Ihk_c',
+    apiKey: 'AIzaSyA4IoPqj5LM9blmMEBamUwSYUtOlnv4EvQ',
     appId: '1:74398229766:web:d4384ee8a3cedb8a286a87',
     messagingSenderId: '74398229766',
     projectId: 'gym-royale-a4ca4',
@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAvGB2YXdoh8zPpUWu0DNLD_7pO5q2Lon0',
+    apiKey: 'AIzaSyBJmR2FRprxPc2RLNncPGQDGRkA7q1c92E',
     appId: '1:74398229766:android:92efdfb03098893b286a87',
     messagingSenderId: '74398229766',
     projectId: 'gym-royale-a4ca4',
@@ -59,7 +59,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDYvjj9hLKxOJbV-b1lBs_mxp6gd1o9h-M',
+    apiKey: 'AIzaSyCpeP5rrdGriOqUD8Y-dv7mdYSa2JwEkZc',
     appId: '1:74398229766:ios:2400e609e6428e7a286a87',
     messagingSenderId: '74398229766',
     projectId: 'gym-royale-a4ca4',
@@ -68,7 +68,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDYvjj9hLKxOJbV-b1lBs_mxp6gd1o9h-M',
+    apiKey: 'AIzaSyCpeP5rrdGriOqUD8Y-dv7mdYSa2JwEkZc',
     appId: '1:74398229766:ios:2400e609e6428e7a286a87',
     messagingSenderId: '74398229766',
     projectId: 'gym-royale-a4ca4',
@@ -77,7 +77,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyA-tmqcoLEh_uhNtHNuEFhcuq8Os4Ihk_c',
+    apiKey: 'AIzaSyA4IoPqj5LM9blmMEBamUwSYUtOlnv4EvQ',
     appId: '1:74398229766:web:5ad6ea8f294f6d75286a87',
     messagingSenderId: '74398229766',
     projectId: 'gym-royale-a4ca4',
@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'gym-royale-a4ca4.firebasestorage.app',
     measurementId: 'G-625CTF7QHW',
   );
+
 }

@@ -33,6 +33,9 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Prevent API Key from being pushed
+lib/firebase_options.dart
+
 # Symbolication related
 app.*.symbols
 

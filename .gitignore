@@ -50,6 +50,9 @@ key.properties
 **/*.keystore
 **/*.jks
 
+# Prevent API Key from being pushed
+lib/firebase_options.dart
+
 # Symbolication / obfuscation
 app.*.symbols
 app.*.map.json

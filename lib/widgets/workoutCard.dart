@@ -7,7 +7,22 @@ class WorkoutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Card(
+      clipBehavior: Clip.hardEdge,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header
+          Padding(padding: padding)
+          // Stats row
+          Padding(padding: padding)
+          // Footer
+          Padding(padding: padding)
+        ],
+      )
+    );
   }
 }

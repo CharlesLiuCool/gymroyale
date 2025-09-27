@@ -1,4 +1,4 @@
-enum ActivityType { run, ride, walk, hike }
+enum ActivityType { cardio, lift, blend }
 
 class WorkoutActivity {
   final String id;

@@ -24,7 +24,7 @@ class WorkoutCard extends StatelessWidget {
                   radius: 18,
                   backgroundColor: cs.primaryContainer,
                   child: Icon(
-                    Icons.fitness_center, color: cs.onPrimary
+                    _iconFor(activity.activityType)
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -135,5 +135,16 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10),
       ),
     );
+  }
+}
+
+IconData _iconFor(ActivityType t) {
+  switch (t) {
+    case ActivityType.lift:
+      return Icons.fitness_center;
+    case ActivityType.cardio:
+      return Icons.directions_run;
+    case ActivityType.blend:
+      return Icons.fitbit;
   }
 }

@@ -60,7 +60,14 @@ class WorkoutCard extends StatelessWidget {
             ),
           ),
           // Footer
-          //Padding(padding: padding),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 8)
+            child: Row(
+              children: [
+
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -92,6 +99,26 @@ class StatChip extends StatelessWidget {
           const SizedBox(height: 4),
           Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _ActionButton({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return TextButton.icon(
+      onPressed: () {},
+      icon: Icon(icon, size: 20, color: cs.onSurface),
+      label: Text(label, style: TextStyle(color: cs.onSurface)),
+      style: TextButton.styleFrom(
+        foregroundColor: cs.onSurface,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
       ),
     );
   }

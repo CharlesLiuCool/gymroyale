@@ -35,7 +35,7 @@ class WorkoutCard extends StatelessWidget {
                       Text(activity.title,
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
                       const SizedBox(width: 12),
-                      Text(activity.startedAt.toString(), 
+                      Text(_friendlyDate(activity.startedAt), 
                           style: theme.textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant)),
                     ],
                   ),
@@ -148,3 +148,18 @@ IconData _iconFor(ActivityType t) {
       return Icons.fitbit;
   }
 }
+
+String _friendlyDate(DateTime dt) {
+  final now = DateTime.now();
+  final sameDay = now.year == dt.year && now.month == dt.month && now.day == dt.day;
+  if (sameDay) {
+    final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
+    final m = dt.minute.toString().padLeft(2, '0');
+    final ap = dt.hour >= 12 ? 'PM' : 'AM';
+    return 'Today • $h:$m $ap';
+  }
+  return '${_month(dt.month)} ${dt.day}, ${dt.year}';
+}
+
+String _month(int m) =>
+    const ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1];

@@ -61,10 +61,24 @@ class WorkoutCard extends StatelessWidget {
           ),
           // Footer
           Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 8, 8)
+            padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
             child: Row(
               children: [
-
+                _ActionButton(
+                  icon: Icons.favorite_border, 
+                  label: '${activity.likeCount}'
+                ),
+                const SizedBox(width: 4),
+                _ActionButton(
+                  icon: Icons.mode_comment_outlined, 
+                  label: '${activity.commentsCount}'
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.share), 
+                  label: const Text('Share')
+                  ),
               ],
             ),
           ),

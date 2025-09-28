@@ -53,7 +53,7 @@ class WorkoutCard extends StatelessWidget {
                 Expanded(
                   child: StatChip(
                     label: 'Time moving',
-                    value: activity.movingTime.toString()
+                    value: _formatDuration(activity.movingTime)
                   ),
                 ),
               ],
@@ -163,3 +163,10 @@ String _friendlyDate(DateTime dt) {
 
 String _month(int m) =>
     const ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1];
+
+String _formatDuration(Duration d) {
+  final h = d.inHours;
+  final m = d.inMinutes % 60;
+  final s = d.inSeconds % 60;
+  return h > 0 ? '${h}h ${m}m' : '${m}m ${s}s';
+}

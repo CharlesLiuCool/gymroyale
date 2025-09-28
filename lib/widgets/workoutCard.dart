@@ -45,10 +45,52 @@ class WorkoutCard extends StatelessWidget {
               ],
             ),
           ),
-          // Stats row
-          //Padding(padding: padding),
+          // Stats row add extra data here as we decide
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: StatChip(
+                    label: 'Time moving',
+                    value: activity.movingTime.toString()
+                  ),
+                ),
+              ],
+            ),
+          ),
           // Footer
           //Padding(padding: padding),
+        ],
+      ),
+    );
+  }
+}
+
+// Subcomponent
+class StatChip extends StatelessWidget {
+  final String label;
+  final String value;
+  const StatChip({super.key, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: theme.textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
+          const SizedBox(height: 4),
+          Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
         ],
       ),
     );

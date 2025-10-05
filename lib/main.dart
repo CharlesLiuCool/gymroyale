@@ -28,7 +28,11 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('Leaderboard')),
         body: Leaderboard(repo: repo),
-        floatingActionButton: GymCheckInButton(userId: 'Charles', repo: repo),
+        // FUTURE: Update UserId to be unique per person (perhaps set it as username?)
+        floatingActionButton: GymCheckInButton(
+          userId: 'UserIdHere',
+          repo: repo,
+        ),
       ),
     );
   }

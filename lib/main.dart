@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(title: const Text('Leaderboard')),
         body: Leaderboard(repo: repo),
-        floatingActionButton: const GymCheckInButton(),
+        floatingActionButton: GymCheckInButton(userId: 'Charles', repo: repo),
       ),
     );
   }

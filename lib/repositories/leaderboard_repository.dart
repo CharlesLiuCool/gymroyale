@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import '../models/user.dart';
 import '../models/user_history.dart';
 import '../models/user_point_entry.dart';
@@ -6,8 +7,27 @@ import 'package:rxdart/rxdart.dart';
 
 class LeaderboardRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+
   CollectionReference<Map<String, dynamic>> get _users =>
       _db.collection('users');
+
+  /// Returns currently logged-in Firebase user ID
+  String? get currentUserId => _auth.currentUser?.uid;
+
+  /// A stream of the authenticated user ID (reactive login/logout)
+  Stream<String?> get currentUserIdStream =>
+      _auth.authStateChanges().map((u) => u?.uid);
+
+  /// A live stream of the current user's User model
+  Stream<User?> watchCurrentUser() {
+    final uid = currentUserId;
+    if (uid == null) return const Stream.empty();
+    return _users.doc(uid).snapshots().map((doc) {
+      if (!doc.exists) return null;
+      return User.fromMap(doc.data()!, doc.id);
+    });
+  }
 
   /// Stream of top users ordered by points
   Stream<List<User>> topUsers({int limit = 20}) {
@@ -35,14 +55,13 @@ class LeaderboardRepository {
       'createdAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
-    // Also add history entry
     await _users.doc(userId).collection('history').add({
       'timestamp': FieldValue.serverTimestamp(),
       'points': points,
     });
   }
 
-  /// Add or increment points for a user, AND log history
+  /// Add or increment points for a user, and log history
   Future<void> addPoints(String userId, int delta) async {
     final ref = _users.doc(userId);
     final doc = await ref.get();
@@ -50,7 +69,6 @@ class LeaderboardRepository {
     int newPoints = delta;
 
     if (!doc.exists) {
-      // Create missing user doc
       await ref.set({
         'points': delta,
         'createdAt': FieldValue.serverTimestamp(),
@@ -58,11 +76,9 @@ class LeaderboardRepository {
     } else {
       final currentPoints = doc['points'] ?? 0;
       newPoints = currentPoints + delta;
-
       await ref.update({'points': FieldValue.increment(delta)});
     }
 
-    // Write history entry
     await ref.collection('history').add({
       'timestamp': FieldValue.serverTimestamp(),
       'points': newPoints,
@@ -79,6 +95,7 @@ class LeaderboardRepository {
     await _users.doc(userId).update({'name': newName});
   }
 
+  /// Stream of history entries for each user
   Stream<List<UserHistory>> watchTopUserHistory(List<User> users) {
     final streams =
         users.map((user) {

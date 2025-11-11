@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:gymroyale/models/workoutActivity.dart';
-import '../widgets/workoutCard.dart';
+import 'workout_card.dart';
+import '../app_colors.dart';
 
 class FeedPage extends StatelessWidget {
-  final Widget leaderboard; // any widget (e.g. your leaderboard)
-  final List<WorkoutActivity> workouts; // workout data list
+  final Widget leaderboard;
+  final List<WorkoutActivity> workouts;
 
   const FeedPage({
     super.key,
@@ -17,29 +18,47 @@ class FeedPage extends StatelessWidget {
     final hasItems = workouts.isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Feed')),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.card,
+        title: const Text(
+          'Feed',
+          style: TextStyle(color: AppColors.textPrimary),
+        ),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+      ),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // Leaderboard at the top
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              sliver: SliverToBoxAdapter(child: leaderboard),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 100),
+                      child: leaderboard,
+                    ),
+                  ],
+                ),
+              ),
             ),
 
-            // Empty state (optional)
             if (!hasItems)
               SliverFillRemaining(
                 hasScrollBody: false,
                 child: Center(
                   child: Text(
                     'No workouts yet',
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 16,
+                    ),
                   ),
                 ),
               ),
 
-            // Workout feed
             if (hasItems)
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -48,7 +67,9 @@ class FeedPage extends StatelessWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final activity = workouts[index];
-                    return WorkoutCard(activity: activity);
+                    return WorkoutCard(
+                      activity: activity,
+                    ); // Make sure WorkoutCard uses dark styling too
                   },
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../repositories/leaderboard_repository.dart';
 import 'leaderboard_row.dart';
+import '../app_colors.dart';
 
 class Leaderboard extends StatefulWidget {
   final LeaderboardRepository repo;
@@ -37,12 +38,17 @@ class _LeaderboardState extends State<Leaderboard> {
           );
         }
 
-        return ListView.builder(
-          itemCount: users.length,
-          itemBuilder: (context, index) {
-            final user = users[index];
-            return LeaderboardRow(user: user);
-          },
+        return Container(
+          color: AppColors.background,
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              final user = users[index];
+              return LeaderboardRow(user: user);
+            },
+          ),
         );
       },
     );

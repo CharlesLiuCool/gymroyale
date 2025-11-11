@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:gymroyale/models/workoutActivity.dart';
-import 'package:gymroyale/widgets/workoutCard.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
+import 'pages/login_page.dart';
 import 'repositories/leaderboard_repository.dart';
-import 'widgets/leaderboard.dart';
-import 'widgets/gym_checkin_button.dart';
+import 'pages/main_page.dart';
+import 'app_colors.dart';
 
-Future main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
@@ -22,58 +21,50 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = LeaderboardRepository();
 
-    final activity = WorkoutActivity(
-      id: 'a1', 
-      title: 'Evening lift', 
-      activityType: ActivityType.lift, 
-      startedAt: DateTime.now().subtract(const Duration(hours: 3, minutes: 12)), 
-      movingTime: const Duration(minutes:42, seconds: 10), 
-      likeCount: 12, 
-      commentsCount: 3
-    );
-
-    final activity2 = WorkoutActivity(
-      id: 'a2', 
-      title: 'Afternoon Treadmill', 
-      activityType: ActivityType.cardio, 
-      startedAt: DateTime.now().subtract(const Duration(hours: 2, minutes: 30)), 
-      movingTime: const Duration(minutes: 15, seconds: 30), 
-      likeCount: 30, 
-      commentsCount: 5
-    );
-
-    final activity3 = WorkoutActivity(
-      id: 'a3', 
-      title: 'Morning workout + run', 
-      activityType: ActivityType.blend, 
-      startedAt: DateTime.now().subtract(const Duration(hours: 4, minutes: 45)), 
-      movingTime: const Duration(hours: 1, minutes: 15, seconds: 23), 
-      likeCount: 60, 
-      commentsCount: 15
-    );
-
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-
       title: 'Gym Royale',
-
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Leaderboard')),
-        body: ListView(
-          children: [
-          Leaderboard(repo: repo),
-          // FUTURE: Update UserId to be unique per person (perhaps set it as username?)
-          WorkoutCard(activity: activity),
-          WorkoutCard(activity: activity2),
-          WorkoutCard(activity: activity3)
-          ],
-        ),
-        floatingActionButton: GymCheckInButton(
-          userId: 'UserIdHere',
-          repo: repo,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: AppColors.background,
+        cardColor: AppColors.card,
+        primaryColor: AppColors.accent,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: AppColors.textPrimary),
+          bodyMedium: TextStyle(color: AppColors.textSecondary),
         ),
       ),
+      home: AuthGate(repo: repo),
+    );
+  }
+}
+
+/// Decides whether to show LoginPage or MainPage
+class AuthGate extends StatelessWidget {
+  final LeaderboardRepository repo;
+  const AuthGate({super.key, required this.repo});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        // While waiting for Firebase to initialize
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final user = snapshot.data;
+
+        if (user != null) {
+          // User is signed in
+          return MainPage(userId: user.uid, repo: repo);
+        } else {
+          // User is NOT signed in
+          return const LoginPage();
+        }
+      },
     );
   }
 }

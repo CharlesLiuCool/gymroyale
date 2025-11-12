@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../repositories/leaderboard_repository.dart';
+import '../app_colors.dart';
 
 class GymCheckInButton extends StatefulWidget {
   final String userId;
@@ -17,7 +18,6 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
   String? _message;
   double? _distanceMeters;
 
-  // Replace with your gym coordinates
   final double gymLat = 46.73746;
   final double gymLng = -117.15440;
 
@@ -60,7 +60,6 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
       });
 
       if (distance <= 200) {
-        // Add points if within range
         await widget.repo.addPoints(widget.userId, 10);
 
         setState(() {
@@ -85,29 +84,70 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ElevatedButton(
-          onPressed: _checking ? null : _checkIn,
-          child:
-              _checking
-                  ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.end, // align content at bottom
+          crossAxisAlignment: CrossAxisAlignment.center, // center horizontally
+          children: [
+            SizedBox(
+              width: double.infinity, // ensures button fills padding width
+              child: Center(
+                // ensures button stays centered regardless of parent
+                child: ElevatedButton(
+                  onPressed: _checking ? null : _checkIn,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: AppColors.textPrimary,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 14,
+                      horizontal: 24,
                     ),
-                  )
-                  : const Text("Check In at Gym"),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child:
+                      _checking
+                          ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: AppColors.textPrimary,
+                              strokeWidth: 2,
+                            ),
+                          )
+                          : const Text(
+                            "Check In at Gym",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                ),
+              ),
+            ),
+            if (_message != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                _message!,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppColors.textSecondary),
+              ),
+            ],
+            if (_distanceMeters != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                "Distance to gym: ${_distanceMeters!.toStringAsFixed(1)} m",
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppColors.textSecondary),
+              ),
+            ],
+          ],
         ),
-        if (_message != null) ...[const SizedBox(height: 8), Text(_message!)],
-        if (_distanceMeters != null) ...[
-          const SizedBox(height: 4),
-          Text("Distance to gym: ${_distanceMeters!.toStringAsFixed(1)} m"),
-        ],
-      ],
+      ),
     );
   }
 }

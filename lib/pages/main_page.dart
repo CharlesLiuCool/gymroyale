@@ -4,7 +4,7 @@ import 'package:gymroyale/widgets/feed.dart';
 import 'package:gymroyale/repositories/leaderboard_repository.dart';
 import 'package:gymroyale/models/workoutActivity.dart';
 import 'package:gymroyale/widgets/gym_checkin_button.dart';
-import 'package:gymroyale/widgets/leaderboard.dart'; // correct leaderboard import
+import 'package:gymroyale/widgets/leaderboard.dart';
 
 class MainPage extends StatefulWidget {
   final String userId;
@@ -76,13 +76,21 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
-      body: FeedPage(
-        leaderboard: Leaderboard(repo: widget.repo), // pass leaderboard here
-        workouts: _workouts,
-      ),
-      floatingActionButton: GymCheckInButton(
-        userId: widget.userId,
-        repo: widget.repo,
+      body: Stack(
+        children: [
+          // Main feed with workouts and leaderboard
+          FeedPage(
+            leaderboard: Leaderboard(repo: widget.repo),
+            workouts: _workouts,
+          ),
+          // Positioned GymCheckInButton at bottom-center
+          Positioned(
+            left: 32,
+            right: 32,
+            bottom: 16,
+            child: GymCheckInButton(userId: widget.userId, repo: widget.repo),
+          ),
+        ],
       ),
     );
   }

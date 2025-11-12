@@ -25,7 +25,7 @@ class LeaderboardRow extends StatelessWidget {
               style: const TextStyle(color: AppColors.textPrimary),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               user.name,

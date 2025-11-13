@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gymroyale/widgets/feed.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gymroyale/repositories/leaderboard_repository.dart';
 import 'package:gymroyale/models/workoutActivity.dart';
 import 'package:gymroyale/widgets/gym_checkin_button.dart';
 import 'package:gymroyale/widgets/leaderboard.dart';
+import '../widgets/workout_card.dart';
+import '../app_colors.dart';
 
 class MainPage extends StatefulWidget {
   final String userId;
@@ -59,15 +61,45 @@ class _MainPageState extends State<MainPage> {
     ];
   }
 
+  /// Proper sign-out handling for Firebase + Google
   Future<void> _signOut() async {
+    final googleSignIn = GoogleSignIn();
+
+    try {
+      if (await googleSignIn.isSignedIn()) {
+        await googleSignIn.disconnect(); // clear cached account
+      }
+    } catch (e) {
+      debugPrint("Google disconnect error: $e");
+    }
+
     await FirebaseAuth.instance.signOut();
+    // NOTE: don't navigate manually
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Gym Royale'),
+        backgroundColor: AppColors.card,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        elevation: 0.5,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/gym_royale_logo.png', height: 36),
+            const SizedBox(width: 10),
+            const Text(
+              'Gym Royale',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -76,21 +108,71 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          // Main feed with workouts and leaderboard
-          FeedPage(
-            leaderboard: Leaderboard(repo: widget.repo),
-            workouts: _workouts,
-          ),
-          // Positioned GymCheckInButton at bottom-center
-          Positioned(
-            left: 32,
-            right: 32,
-            bottom: 16,
-            child: GymCheckInButton(userId: widget.userId, repo: widget.repo),
-          ),
-        ],
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Leaderboard header
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Text(
+                'Leaderboard',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Leaderboard(repo: widget.repo),
+            ),
+
+            // Workouts header
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+              child: Text(
+                'Workouts',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ),
+
+            // Workout list
+            Expanded(
+              child:
+                  _workouts.isNotEmpty
+                      ? ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: _workouts.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final activity = _workouts[index];
+                          return WorkoutCard(activity: activity);
+                        },
+                      )
+                      : const Center(
+                        child: Text(
+                          'No workouts yet',
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+            ),
+
+            // Check-in button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              child: GymCheckInButton(userId: widget.userId, repo: widget.repo),
+            ),
+          ],
+        ),
       ),
     );
   }

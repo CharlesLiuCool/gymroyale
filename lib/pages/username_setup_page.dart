@@ -31,19 +31,14 @@ class _UsernameSetupPageState extends State<UsernameSetupPage> {
         .collection('users')
         .doc(widget.userId);
 
-    // Check if user already exists in leaderboard
-    final exists = await widget.repo.userExists(widget.userId);
+    // --- Update the Firestore user doc with the chosen username ---
+    await userRef.set({
+      'name': username,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
 
-    if (!exists) {
-      // Brand new user: add to leaderboard and Firestore with points = 0
-      await widget.repo.addUser(widget.userId, username, 0);
-    } else {
-      // Existing user: ensure 'points' field exists
-      await userRef.set({
-        'name': username,
-        'points': FieldValue.increment(0),
-      }, SetOptions(merge: true));
-    }
+    // --- Ensure leaderboard entry exists (create if missing) ---
+    await widget.repo.addPoints(widget.userId, 0);
 
     setState(() => _loading = false);
 

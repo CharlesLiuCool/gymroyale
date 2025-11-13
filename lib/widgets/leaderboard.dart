@@ -5,15 +5,15 @@ import '../app_colors.dart';
 import 'dart:math' as math;
 
 class Leaderboard extends StatefulWidget {
-  final double initialHeight; // small initial height
-  final double expandedHeight; // height when expanded
+  final double initialHeight;
+  final double expandedHeight;
   final dynamic repo;
 
   const Leaderboard({
     super.key,
     this.initialHeight = 180,
     this.expandedHeight = 400,
-    this.repo,
+    required this.repo,
   });
 
   @override
@@ -31,71 +31,83 @@ class _LeaderboardState extends State<Leaderboard> {
 
   @override
   Widget build(BuildContext context) {
-    // Temporary test users
-    final users = List<User>.generate(
-      10,
-      (index) => User(
-        id: 'user$index',
-        name: 'User ${index + 1}',
-        points: (10 - index) * 10,
-        rank: index + 1,
-      ),
-    );
-
     final rowHeight = 60.0;
-    final calculatedHeight = users.length * rowHeight;
 
-    final containerHeight =
-        _expanded
-            ? math.min(calculatedHeight, widget.expandedHeight)
-            : widget.initialHeight;
+    return StreamBuilder<List<User>>(
+      stream: widget.repo.topUsers(limit: 20),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return Column(
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          height: containerHeight,
-          decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: ListView.builder(
-              physics:
-                  _expanded
-                      ? const AlwaysScrollableScrollPhysics()
-                      : const NeverScrollableScrollPhysics(),
-              itemCount: users.length,
-              itemBuilder: (context, index) {
-                final user = users[index];
-                return SizedBox(
-                  height: rowHeight,
-                  child: LeaderboardRow(user: user),
-                );
-              },
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(
+            child: Text(
+              "No users yet",
+              style: TextStyle(color: AppColors.textSecondary),
             ),
-          ),
-        ),
+          );
+        }
 
-        // Show More / Collapse button
-        TextButton(
-          onPressed: _toggleExpanded,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                _expanded ? "Show Less" : "Show More",
-                style: const TextStyle(color: AppColors.accent),
+        // Create a ranked list without mutating `User`
+        final users = List<User>.generate(
+          snapshot.data!.length,
+          (i) => snapshot.data![i].copyWith(rank: i + 1),
+        );
+
+        final calculatedHeight = users.length * rowHeight;
+        final containerHeight =
+            _expanded
+                ? math.min(calculatedHeight, widget.expandedHeight)
+                : widget.initialHeight;
+
+        return Column(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: containerHeight,
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(12),
               ),
-              Icon(
-                _expanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                color: AppColors.accent,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: ListView.builder(
+                  physics:
+                      _expanded
+                          ? const AlwaysScrollableScrollPhysics()
+                          : const NeverScrollableScrollPhysics(),
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    final user = users[index];
+                    return SizedBox(
+                      height: rowHeight,
+                      child: LeaderboardRow(user: user),
+                    );
+                  },
+                ),
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+
+            TextButton(
+              onPressed: _toggleExpanded,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _expanded ? "Show Less" : "Show More",
+                    style: const TextStyle(color: AppColors.accent),
+                  ),
+                  Icon(
+                    _expanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                    color: AppColors.accent,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

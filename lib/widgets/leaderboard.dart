@@ -89,22 +89,23 @@ class _LeaderboardState extends State<Leaderboard> {
               ),
             ),
 
-            TextButton(
-              onPressed: _toggleExpanded,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _expanded ? "Show Less" : "Show More",
-                    style: const TextStyle(color: AppColors.accent),
-                  ),
-                  Icon(
-                    _expanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                    color: AppColors.accent,
-                  ),
-                ],
+            if (users.length >= 4)
+              TextButton(
+                onPressed: _toggleExpanded,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _expanded ? "Show Less" : "Show More",
+                      style: const TextStyle(color: AppColors.accent),
+                    ),
+                    Icon(
+                      _expanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                      color: AppColors.accent,
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         );
       },

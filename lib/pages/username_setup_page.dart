@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/leaderboard_repository.dart';
-import 'main_page.dart';
+import '../auth_gate.dart'; // <-- import this
 
 class UsernameSetupPage extends StatefulWidget {
   final String userId;
@@ -31,25 +31,22 @@ class _UsernameSetupPageState extends State<UsernameSetupPage> {
         .collection('users')
         .doc(widget.userId);
 
-    // --- Update the Firestore user doc with the chosen username ---
     await userRef.set({
       'name': username,
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
 
-    // --- Ensure leaderboard entry exists (create if missing) ---
     await widget.repo.addPoints(widget.userId, 0);
 
     setState(() => _loading = false);
 
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MainPage(userId: widget.userId, repo: widget.repo),
-        ),
-      );
-    }
+    if (!mounted) return;
+
+    // 🔥 IMPORTANT: Go back to AuthGate so it re-checks Firestore
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const AuthGate()),
+    );
   }
 
   @override

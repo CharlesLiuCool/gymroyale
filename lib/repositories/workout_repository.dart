@@ -29,4 +29,9 @@ class WorkoutRepository {
       );
     }).toList();
   }
+
+  Future<void> addWorkout(String userId, WorkoutActivity workout) async {
+    final ref = _db.collection('users').doc(userId).collection('workouts');
+    await ref.add(workout.toMap());
+  }
 }

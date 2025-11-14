@@ -123,12 +123,16 @@ class _MainPageState extends State<MainPage> {
 
             // Workout list
             Expanded(
-              child:
+              child: Stack(
+                children: [
                   _loadingWorkouts
                       ? const Center(child: CircularProgressIndicator())
                       : _workouts.isNotEmpty
                       ? ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                         itemCount: _workouts.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
@@ -145,12 +149,186 @@ class _MainPageState extends State<MainPage> {
                           ),
                         ),
                       ),
+
+                  // Floating Add Button
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: FloatingActionButton(
+                      backgroundColor: AppColors.accent,
+                      child: const Icon(Icons.add, color: Colors.white),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder:
+                              (_) => AddWorkoutSheet(
+                                userId: widget.userId,
+                                onWorkoutAdded: _loadWorkouts,
+                              ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // Check-in button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               child: GymCheckInButton(userId: widget.userId, repo: widget.repo),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AddWorkoutSheet extends StatefulWidget {
+  final String userId;
+  final VoidCallback onWorkoutAdded;
+
+  const AddWorkoutSheet({
+    super.key,
+    required this.userId,
+    required this.onWorkoutAdded,
+  });
+
+  @override
+  State<AddWorkoutSheet> createState() => _AddWorkoutSheetState();
+}
+
+class _AddWorkoutSheetState extends State<AddWorkoutSheet> {
+  final _formKey = GlobalKey<FormState>();
+  String _title = '';
+  ActivityType _activityType = ActivityType.lift;
+  Duration _movingTime = const Duration(minutes: 30);
+
+  bool _saving = false;
+
+  Future<void> _saveWorkout() async {
+    if (!_formKey.currentState!.validate()) return;
+    _formKey.currentState!.save();
+
+    setState(() => _saving = true);
+
+    final newWorkout = WorkoutActivity(
+      id: '',
+      title: _title,
+      activityType: _activityType,
+      startedAt: DateTime.now(),
+      movingTime: _movingTime,
+      likeCount: 0,
+      commentsCount: 0,
+    );
+
+    final repo = WorkoutRepository();
+    await repo.addWorkout(widget.userId, newWorkout);
+
+    widget.onWorkoutAdded();
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      height: MediaQuery.of(context).size.height * 0.85,
+      decoration: const BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            const Text(
+              'Add Workout',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Title
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Workout Name',
+                labelStyle: TextStyle(color: AppColors.textSecondary),
+              ),
+              onSaved: (value) => _title = value ?? '',
+              validator:
+                  (value) =>
+                      value == null || value.isEmpty ? 'Enter a name' : null,
+            ),
+
+            const SizedBox(height: 16),
+
+            // Activity Type
+            DropdownButtonFormField<ActivityType>(
+              value: _activityType,
+              decoration: const InputDecoration(
+                labelText: 'Activity Type',
+                labelStyle: TextStyle(color: AppColors.textSecondary),
+              ),
+              items:
+                  ActivityType.values.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(type.name),
+                    );
+                  }).toList(),
+              onChanged:
+                  (value) => setState(
+                    () => _activityType = value ?? ActivityType.lift,
+                  ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Moving Time
+            TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Time Moving (minutes)',
+                labelStyle: TextStyle(color: AppColors.textSecondary),
+              ),
+              keyboardType: TextInputType.number,
+              onSaved: (value) {
+                final minutes = int.tryParse(value ?? '30') ?? 30;
+                _movingTime = Duration(minutes: minutes);
+              },
+            ),
+
+            const Spacer(),
+
+            // Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: _saving ? null : _saveWorkout,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                  ),
+                  child:
+                      _saving
+                          ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                          : const Text('Save'),
+                ),
+              ],
             ),
           ],
         ),

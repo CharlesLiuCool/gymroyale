@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
+import '../app_colors.dart';
 
 class LeaderboardRow extends StatelessWidget {
   final User user;
@@ -9,31 +10,40 @@ class LeaderboardRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(
-          255,
-          116,
-          197,
-          255,
-        ), // light blue background
-        borderRadius: BorderRadius.circular(12), // rounded corners
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(2, 2)),
-        ],
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(10),
       ),
-      child: ListTile(
-        leading: Text(
-          '#${user.rank}',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        title: Text(user.name),
-        trailing: Text(
-          user.points.toString(),
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: AppColors.accent,
+            child: Text(
+              '${user.rank}',
+              style: const TextStyle(color: AppColors.textPrimary),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              user.name,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Text(
+            '${user.points} pts',
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+            ),
+          ),
+        ],
       ),
     );
   }

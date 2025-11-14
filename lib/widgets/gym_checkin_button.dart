@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../repositories/leaderboard_repository.dart';
+import '../app_colors.dart';
 
 class GymCheckInButton extends StatefulWidget {
   final String userId;
@@ -14,17 +15,14 @@ class GymCheckInButton extends StatefulWidget {
 
 class _GymCheckInButtonState extends State<GymCheckInButton> {
   bool _checking = false;
-  String? _message;
   double? _distanceMeters;
 
-  // Replace with your gym coordinates
   final double gymLat = 46.73746;
   final double gymLng = -117.15440;
 
   Future _checkIn() async {
     setState(() {
       _checking = true;
-      _message = null;
     });
 
     try {
@@ -32,20 +30,16 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
 
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        setState(() {
-          _message = "Location permission is required.";
-          _checking = false;
-        });
+        _showNotification("Location permission is required.");
+        setState(() => _checking = false);
         return;
       }
 
-      LocationSettings locationSettings = const LocationSettings(
-        accuracy: LocationAccuracy.best,
-        distanceFilter: 1,
-      );
-
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: locationSettings,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.best,
+          distanceFilter: 1,
+        ),
       );
 
       double distance = Geolocator.distanceBetween(
@@ -55,59 +49,75 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
         gymLng,
       );
 
-      setState(() {
-        _distanceMeters = distance;
-      });
+      setState(() => _distanceMeters = distance);
 
       if (distance <= 200) {
-        // Add points if within range
         await widget.repo.addPoints(widget.userId, 10);
-
-        setState(() {
-          _message = "Checked in at the gym! +10 points";
-        });
+        _showNotification("Checked in at the gym! +10 points");
       } else {
-        setState(() {
-          _message =
-              "You’re too far from the gym. (${distance.toStringAsFixed(1)} m)";
-        });
+        _showNotification(
+          "You’re too far from the gym (${distance.toStringAsFixed(1)} m)",
+        );
       }
     } catch (e) {
-      setState(() {
-        _message = "Error: $e";
-      });
+      _showNotification("Error: $e");
     }
 
-    setState(() {
-      _checking = false;
-    });
+    setState(() => _checking = false);
+  }
+
+  void _showNotification(String message) {
+    // Show a small notification at the top-right using ScaffoldMessenger
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.fromLTRB(0, 8, 16, 0),
+          backgroundColor: AppColors.accent,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ElevatedButton(
-          onPressed: _checking ? null : _checkIn,
-          child:
-              _checking
-                  ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8.0),
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _checking ? null : _checkIn,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accent,
+              foregroundColor: AppColors.textPrimary,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child:
+                _checking
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: AppColors.textPrimary,
+                        strokeWidth: 2,
+                      ),
+                    )
+                    : const Text(
+                      "Check In at Gym",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  )
-                  : const Text("Check In at Gym"),
+          ),
         ),
-        if (_message != null) ...[const SizedBox(height: 8), Text(_message!)],
-        if (_distanceMeters != null) ...[
-          const SizedBox(height: 4),
-          Text("Distance to gym: ${_distanceMeters!.toStringAsFixed(1)} m"),
-        ],
-      ],
+      ),
     );
   }
 }

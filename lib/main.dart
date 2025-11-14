@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'repositories/leaderboard_repository.dart';
-import 'widgets/leaderboard.dart';
-import 'widgets/gym_checkin_button.dart';
+import 'auth_gate.dart';
+import 'app_colors.dart';
 
-Future main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());
@@ -18,22 +16,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repo = LeaderboardRepository();
-
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-
       title: 'Gym Royale',
-
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Leaderboard')),
-        body: Leaderboard(repo: repo),
-        // FUTURE: Update UserId to be unique per person (perhaps set it as username?)
-        floatingActionButton: GymCheckInButton(
-          userId: 'UserIdHere',
-          repo: repo,
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: AppColors.background,
+        cardColor: AppColors.card,
+        primaryColor: AppColors.accent,
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: AppColors.textPrimary),
+          bodyMedium: TextStyle(color: AppColors.textSecondary),
         ),
       ),
+      home: const AuthGate(), // ← handles login, username setup, main
     );
   }
 }

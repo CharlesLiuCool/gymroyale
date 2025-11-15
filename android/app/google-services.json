@@ -12,7 +12,20 @@
           "package_name": "com.example.gymroyale"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "74398229766-eaf5faon2q8fbhept2rjpotsutb9op2q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gymroyale",
+            "certificate_hash": "7e888936791a6c911df90db1a52f30c90e4527ac"
+          }
+        },
+        {
+          "client_id": "74398229766-cgjm7fqvu8e21t669drmfob2senlo5d4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBJmR2FRprxPc2RLNncPGQDGRkA7q1c92E"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "74398229766-cgjm7fqvu8e21t669drmfob2senlo5d4.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "74398229766-8cmo73pmlio280jqlfk0hriaeesb3dvs.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gymroyale"
+              }
+            }
+          ]
         }
       }
     }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/workoutActivity.dart';
+import '../models/workout_activity.dart';
 import '../app_colors.dart';
 
 class WorkoutCard extends StatelessWidget {

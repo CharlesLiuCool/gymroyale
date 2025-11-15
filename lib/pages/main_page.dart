@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gymroyale/repositories/leaderboard_repository.dart';
-import 'package:gymroyale/models/workoutActivity.dart';
+import 'package:gymroyale/repositories/workout_repository.dart';
+import 'package:gymroyale/models/workout_activity.dart';
 import 'package:gymroyale/widgets/gym_checkin_button.dart';
+import 'package:gymroyale/widgets/add_workout.dart';
 import 'package:gymroyale/widgets/leaderboard.dart';
 import '../widgets/workout_card.dart';
 import '../app_colors.dart';
@@ -19,46 +21,24 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late final List<WorkoutActivity> _workouts;
+  List<WorkoutActivity> _workouts = [];
+  bool _loadingWorkouts = true;
 
   @override
   void initState() {
     super.initState();
-    _workouts = [
-      WorkoutActivity(
-        id: 'a1',
-        title: 'Evening Lift',
-        activityType: ActivityType.lift,
-        startedAt: DateTime.now().subtract(
-          const Duration(hours: 3, minutes: 12),
-        ),
-        movingTime: const Duration(minutes: 42, seconds: 10),
-        likeCount: 12,
-        commentsCount: 3,
-      ),
-      WorkoutActivity(
-        id: 'a2',
-        title: 'Afternoon Treadmill',
-        activityType: ActivityType.cardio,
-        startedAt: DateTime.now().subtract(
-          const Duration(hours: 2, minutes: 30),
-        ),
-        movingTime: const Duration(minutes: 15, seconds: 30),
-        likeCount: 30,
-        commentsCount: 5,
-      ),
-      WorkoutActivity(
-        id: 'a3',
-        title: 'Morning Workout + Run',
-        activityType: ActivityType.blend,
-        startedAt: DateTime.now().subtract(
-          const Duration(hours: 4, minutes: 45),
-        ),
-        movingTime: const Duration(hours: 1, minutes: 15, seconds: 23),
-        likeCount: 60,
-        commentsCount: 15,
-      ),
-    ];
+    _loadWorkouts();
+  }
+
+  Future<void> _loadWorkouts() async {
+    final workoutRepo = WorkoutRepository();
+    final workouts = await workoutRepo.fetchUserWorkouts(widget.userId);
+    if (mounted) {
+      setState(() {
+        _workouts = workouts;
+        _loadingWorkouts = false;
+      });
+    }
   }
 
   /// Proper sign-out handling for Firebase + Google
@@ -144,10 +124,16 @@ class _MainPageState extends State<MainPage> {
 
             // Workout list
             Expanded(
-              child:
-                  _workouts.isNotEmpty
+              child: Stack(
+                children: [
+                  _loadingWorkouts
+                      ? const Center(child: CircularProgressIndicator())
+                      : _workouts.isNotEmpty
                       ? ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                         itemCount: _workouts.length,
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
@@ -164,6 +150,30 @@ class _MainPageState extends State<MainPage> {
                           ),
                         ),
                       ),
+
+                  // Floating Add Button
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: FloatingActionButton(
+                      backgroundColor: AppColors.accent,
+                      child: const Icon(Icons.add, color: Colors.white),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          builder:
+                              (_) => AddWorkoutSheet(
+                                userId: widget.userId,
+                                onWorkoutAdded: _loadWorkouts,
+                              ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // Check-in button

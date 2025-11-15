@@ -1,12 +1,20 @@
+import 'workout_activity.dart';
+
 class User {
   final String id;
   final String name;
   final int points;
-  final int? rank; // optional, assigned in UI
+  final int? rank;
+  final List<WorkoutActivity>? workouts;
 
-  User({required this.id, required this.name, required this.points, this.rank});
+  User({
+    required this.id,
+    required this.name,
+    required this.points,
+    this.rank,
+    this.workouts,
+  });
 
-  /// Create User from Firestore document map
   factory User.fromMap(Map<String, dynamic> map, String id) {
     return User(
       id: id,
@@ -15,32 +23,58 @@ class User {
           map['points'] is int
               ? map['points'] as int
               : int.tryParse(map['points'].toString()) ?? 0,
+      workouts:
+          map['workouts'] != null
+              ? (map['workouts'] as List)
+                  .map((w) => WorkoutActivity.fromMap(w))
+                  .toList()
+              : null,
     );
   }
 
-  /// Convert User to map for Firestore
   Map<String, dynamic> toMap() {
-    return {'name': name, 'points': points};
+    return {
+      'name': name,
+      'points': points,
+      if (workouts != null)
+        'workouts': workouts!.map((w) => w.toMap()).toList(),
+    };
   }
 
-  /// Optional copyWith for updating fields
-  User copyWith({String? id, String? name, int? points, int? rank}) {
+  User copyWith({
+    String? id,
+    String? name,
+    int? points,
+    int? rank,
+    List<WorkoutActivity>? workouts,
+  }) {
     return User(
       id: id ?? this.id,
       name: name ?? this.name,
       points: points ?? this.points,
       rank: rank ?? this.rank,
+      workouts: workouts ?? this.workouts,
     );
   }
 
-  /// JSON serialization (optional)
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'] as String,
       name: json['name'] as String,
       points: json['points'] as int,
+      workouts:
+          json['workouts'] != null
+              ? (json['workouts'] as List)
+                  .map((w) => WorkoutActivity.fromJson(w))
+                  .toList()
+              : null,
     );
   }
 
-  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'points': points};
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'points': points,
+    if (workouts != null) 'workouts': workouts!.map((w) => w.toJson()).toList(),
+  };
 }

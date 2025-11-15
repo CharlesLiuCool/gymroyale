@@ -7,6 +7,8 @@ import 'package:gymroyale/models/workout_activity.dart';
 import 'package:gymroyale/widgets/gym_checkin_button.dart';
 import 'package:gymroyale/widgets/add_workout.dart';
 import 'package:gymroyale/widgets/leaderboard.dart';
+import 'package:gymroyale/pages/help_page.dart';
+import 'package:gymroyale/pages/profile_page.dart';
 import '../widgets/workout_card.dart';
 import '../app_colors.dart';
 
@@ -89,10 +91,16 @@ class _MainPageState extends State<MainPage> {
                   _signOut();
                   break;
                 case 'profile':
-                  // TODO: Navigate to profile page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ProfilePage()),
+                  );
                   break;
                 case 'help':
-                  // TODO: Show help dialog
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HelpPage()),
+                  );
                   break;
               }
             },

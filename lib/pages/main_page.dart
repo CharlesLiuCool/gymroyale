@@ -81,10 +81,34 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sign Out',
-            onPressed: _signOut,
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.settings, color: AppColors.textPrimary),
+            onSelected: (value) {
+              switch (value) {
+                case 'signout':
+                  _signOut();
+                  break;
+                case 'profile':
+                  // TODO: Navigate to profile page
+                  break;
+                case 'help':
+                  // TODO: Show help dialog
+                  break;
+              }
+            },
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(value: 'profile', child: Text('Profile')),
+                  const PopupMenuItem(value: 'help', child: Text('Help')),
+                  const PopupMenuItem(
+                    value: 'signout',
+                    child: Text('Sign Out'),
+                  ),
+                ],
+            color: AppColors.card,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         ],
       ),

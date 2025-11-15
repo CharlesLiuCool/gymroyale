@@ -7,6 +7,8 @@ import 'package:gymroyale/models/workout_activity.dart';
 import 'package:gymroyale/widgets/gym_checkin_button.dart';
 import 'package:gymroyale/widgets/add_workout.dart';
 import 'package:gymroyale/widgets/leaderboard.dart';
+import 'package:gymroyale/pages/help_page.dart';
+import 'package:gymroyale/pages/profile_page.dart';
 import '../widgets/workout_card.dart';
 import '../app_colors.dart';
 
@@ -81,10 +83,40 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sign Out',
-            onPressed: _signOut,
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.settings, color: AppColors.textPrimary),
+            onSelected: (value) {
+              switch (value) {
+                case 'signout':
+                  _signOut();
+                  break;
+                case 'profile':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ProfilePage()),
+                  );
+                  break;
+                case 'help':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const HelpPage()),
+                  );
+                  break;
+              }
+            },
+            itemBuilder:
+                (context) => [
+                  const PopupMenuItem(value: 'profile', child: Text('Profile')),
+                  const PopupMenuItem(value: 'help', child: Text('Help')),
+                  const PopupMenuItem(
+                    value: 'signout',
+                    child: Text('Sign Out'),
+                  ),
+                ],
+            color: AppColors.card,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
         ],
       ),

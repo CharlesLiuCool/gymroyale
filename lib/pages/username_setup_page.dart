@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/leaderboard_repository.dart';
-import '../auth_gate.dart'; // <-- import this
+import '../auth_gate.dart';
+import '../app_colors.dart';
 
 class UsernameSetupPage extends StatefulWidget {
   final String userId;
@@ -42,7 +43,6 @@ class _UsernameSetupPageState extends State<UsernameSetupPage> {
 
     if (!mounted) return;
 
-    // 🔥 IMPORTANT: Go back to AuthGate so it re-checks Firestore
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const AuthGate()),
@@ -52,21 +52,51 @@ class _UsernameSetupPageState extends State<UsernameSetupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Choose a Username')),
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.card,
+        title: const Text(
+          'Choose a Username',
+          style: TextStyle(color: AppColors.textPrimary),
+        ),
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _controller,
-              decoration: const InputDecoration(labelText: 'Username'),
+              style: const TextStyle(color: AppColors.textPrimary),
+              cursorColor: AppColors.accent,
+              decoration: InputDecoration(
+                labelText: 'Username',
+                labelStyle: const TextStyle(color: AppColors.textSecondary),
+                enabledBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.textSecondary),
+                ),
+                focusedBorder: const UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.accent),
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _loading ? null : _submitUsername,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.accent,
+                foregroundColor: AppColors.textPrimary,
+              ),
               child:
                   _loading
-                      ? const CircularProgressIndicator()
+                      ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.textPrimary,
+                        ),
+                      )
                       : const Text('Continue'),
             ),
           ],

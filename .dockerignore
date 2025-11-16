@@ -1,0 +1,12 @@
+.git
+.build/
+.build-cache/
+build/
+.android/
+.ios/
+.idea/
+.vscode/
+.pub-cache/
+.dart_tool/
+android/app/build/
+ios/Pods/

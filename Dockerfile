@@ -1,5 +1,5 @@
 # Flutter + Android SDK image (Linux)
-FROM cirrusci/flutter:stable
+FROM ghcr.io/cirruslabs/flutter:latest AS build
 
 # Workdir inside container
 WORKDIR /app

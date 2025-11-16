@@ -23,12 +23,15 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.background,
         cardColor: AppColors.card,
         primaryColor: AppColors.accent,
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: AppColors.accent, // 👈 This sets the global loading color
+        ),
         textTheme: const TextTheme(
           bodyLarge: TextStyle(color: AppColors.textPrimary),
           bodyMedium: TextStyle(color: AppColors.textSecondary),
         ),
       ),
-      home: const AuthGate(), // ← handles login, username setup, main
+      home: const AuthGate(),
     );
   }
 }

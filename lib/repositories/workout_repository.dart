@@ -15,18 +15,8 @@ class WorkoutRepository {
 
     return snapshot.docs.map((doc) {
       final data = doc.data();
-      return WorkoutActivity(
-        id: doc.id,
-        title: data['title'] ?? '',
-        activityType: ActivityType.values.firstWhere(
-          (e) => e.name == data['activityType'],
-          orElse: () => ActivityType.lift,
-        ),
-        startedAt: (data['startedAt'] as Timestamp).toDate(),
-        movingTime: Duration(seconds: data['movingTime'] ?? 0),
-        likeCount: data['likeCount'] ?? 0,
-        commentsCount: data['commentsCount'] ?? 0,
-      );
+      data['id'] = doc.id;
+      return parseWorkout(data);
     }).toList();
   }
 

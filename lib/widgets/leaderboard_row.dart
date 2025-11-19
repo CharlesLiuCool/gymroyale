@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
 
 class LeaderboardRow extends StatelessWidget {
   final User user;

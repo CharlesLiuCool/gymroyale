@@ -3,7 +3,7 @@ import 'package:gymroyale/models/cardio_workout.dart';
 import 'package:gymroyale/models/lift_workout.dart';
 import 'package:gymroyale/repositories/workout_repository.dart';
 import 'package:gymroyale/models/workout_activity.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
 
 class AddWorkoutSheet extends StatefulWidget {
   final String userId;
@@ -135,7 +135,7 @@ class _AddWorkoutSheetState extends State<AddWorkoutSheet> {
                       return DropdownMenuItem(
                         value: type,
                         child: Text(
-                          type.name,
+                          type.name[0].toUpperCase() + type.name.substring(1),
                           style: const TextStyle(color: AppColors.textPrimary),
                         ),
                       );

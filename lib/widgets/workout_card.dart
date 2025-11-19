@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gymroyale/models/cardio_workout.dart';
 import 'package:gymroyale/models/lift_workout.dart';
 import '../models/workout_activity.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
 
 class WorkoutCard extends StatelessWidget {
   final WorkoutActivity activity;
@@ -56,7 +56,44 @@ class WorkoutCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.more_horiz, color: AppColors.textSecondary),
+                PopupMenuButton<String>(
+                  icon: const Icon(
+                    Icons.more_horiz,
+                    color: AppColors.textSecondary,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      // TODO: handle edit action
+                      // e.g. Navigator.push(...) to an edit screen
+                    } else if (value == 'delete') {
+                      // TODO: handle delete action
+                      // e.g. call a provider or setState to remove the workout
+                    }
+                  },
+                  itemBuilder:
+                      (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 18),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 18, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Delete'),
+                            ],
+                          ),
+                        ),
+                      ],
+                ),
               ],
             ),
           ),

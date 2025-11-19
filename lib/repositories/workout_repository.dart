@@ -24,4 +24,24 @@ class WorkoutRepository {
     final ref = _db.collection('users').doc(userId).collection('workouts');
     await ref.add(workout.toMap());
   }
+
+  Future<void> deleteWorkout(String userId, String workoutId) async {
+    final ref = _db
+        .collection('users')
+        .doc(userId)
+        .collection('workouts')
+        .doc(workoutId);
+
+    await ref.delete();
+  }
+
+  Future<void> updateWorkout(String userId, WorkoutActivity workout) async {
+    final ref = _db
+        .collection('users')
+        .doc(userId)
+        .collection('workouts')
+        .doc(workout.id);
+
+    await ref.update(workout.toMap());
+  }
 }

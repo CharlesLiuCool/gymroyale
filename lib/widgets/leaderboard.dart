@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 import 'leaderboard_row.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
 import 'dart:math' as math;
 
 class Leaderboard extends StatefulWidget {

@@ -9,8 +9,9 @@ import 'package:gymroyale/widgets/add_workout.dart';
 import 'package:gymroyale/widgets/leaderboard.dart';
 import 'package:gymroyale/pages/help_page.dart';
 import 'package:gymroyale/pages/profile_page.dart';
+import 'package:gymroyale/widgets/settings_menu.dart';
 import '../widgets/workout_card.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
 
 class MainPage extends StatefulWidget {
   final String userId;
@@ -82,43 +83,7 @@ class _MainPageState extends State<MainPage> {
             ),
           ],
         ),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.settings, color: AppColors.textPrimary),
-            onSelected: (value) {
-              switch (value) {
-                case 'signout':
-                  _signOut();
-                  break;
-                case 'profile':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ProfilePage()),
-                  );
-                  break;
-                case 'help':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const HelpPage()),
-                  );
-                  break;
-              }
-            },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem(value: 'profile', child: Text('Profile')),
-                  const PopupMenuItem(value: 'help', child: Text('Help')),
-                  const PopupMenuItem(
-                    value: 'signout',
-                    child: Text('Sign Out'),
-                  ),
-                ],
-            color: AppColors.card,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ],
+        actions: const [SettingsMenu()],
       ),
       body: SafeArea(
         child: Column(

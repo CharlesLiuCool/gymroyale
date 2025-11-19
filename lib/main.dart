@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'auth_gate.dart';
-import 'app_colors.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,18 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Gym Royale',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: AppColors.background,
-        cardColor: AppColors.card,
-        primaryColor: AppColors.accent,
-        progressIndicatorTheme: const ProgressIndicatorThemeData(
-          color: AppColors.accent, // 👈 This sets the global loading color
-        ),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: AppColors.textPrimary),
-          bodyMedium: TextStyle(color: AppColors.textSecondary),
-        ),
-      ),
+      theme: AppTheme.darkTheme,
       home: const AuthGate(),
     );
   }

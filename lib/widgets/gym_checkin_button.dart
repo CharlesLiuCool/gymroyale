@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../repositories/leaderboard_repository.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GymCheckInButton extends StatefulWidget {
@@ -76,17 +76,19 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
           "You're too far from the gym (${distance.toStringAsFixed(1)} m)",
         );
       }
-
       // already checked in
-      if (diff == 0) {
+      else if (diff == 0) {
         _showNotification("You've already checked in today!");
       }
+      // diff == null is first sign-in case, diff == 1 is checked in yesterday
+      else if (diff == null || diff >= 1) {
+        final streak = await updateStreak(widget.userId);
+        final points = 10 + 5 * streak;
 
-      // diff == null is first sign in case, diff == 1 is checked in yesterday
-      if (diff == null || diff >= 1) {
-        await widget.repo.addPoints(widget.userId, 10);
-        await updateStreak(widget.userId);
-        _showNotification("Checked in at the gym! +10 points");
+        await widget.repo.addPoints(widget.userId, points);
+        _showNotification(
+          "Checked in at the gym! +$points points (Streak: $streak)",
+        );
       }
     } catch (e) {
       _showNotification("Error: $e");
@@ -110,7 +112,7 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
     }
   }
 
-  Future<void> updateStreak(String userId) async {
+  Future<int> updateStreak(String userId) async {
     final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
     final doc = await userRef.get();
     final data = doc.data();
@@ -139,6 +141,8 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
       'streakCount': newStreak,
       'lastCheckIn': Timestamp.fromDate(now),
     });
+
+    return newStreak;
   }
 
   @override

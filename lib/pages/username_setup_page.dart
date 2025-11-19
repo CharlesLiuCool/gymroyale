@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../repositories/leaderboard_repository.dart';
 import '../auth_gate.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
 
 class UsernameSetupPage extends StatefulWidget {
   final String userId;

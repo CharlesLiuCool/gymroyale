@@ -38,6 +38,9 @@ class _LeaderboardState extends State<Leaderboard> {
         }
 
         return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          
           itemCount: users.length,
           itemBuilder: (context, index) {
             final user = users[index];

@@ -2,8 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:gymroyale/pages/help_page.dart';
-import 'package:gymroyale/pages/profile_page.dart';
+import 'package:gymroyale/pages/main/help_page.dart';
+import 'package:gymroyale/pages/main/profile_page.dart';
 import '../theme/app_colors.dart';
 
 class SettingsMenu extends StatelessWidget {

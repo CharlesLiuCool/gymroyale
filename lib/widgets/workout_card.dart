@@ -6,7 +6,13 @@ import '../theme/app_colors.dart';
 
 class WorkoutCard extends StatelessWidget {
   final WorkoutActivity activity;
-  const WorkoutCard({super.key, required this.activity});
+  final VoidCallback onDelete;
+
+  const WorkoutCard({
+    super.key,
+    required this.activity,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -66,8 +72,7 @@ class WorkoutCard extends StatelessWidget {
                       // TODO: handle edit action
                       // e.g. Navigator.push(...) to an edit screen
                     } else if (value == 'delete') {
-                      // TODO: handle delete action
-                      // e.g. call a provider or setState to remove the workout
+                      onDelete(); // Call the delete callback
                     }
                   },
                   itemBuilder:
@@ -195,14 +200,17 @@ String _friendlyDate(DateTime dt) {
   final sameDay =
       now.year == dt.year && now.month == dt.month && now.day == dt.day;
 
+  final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12; // Convert to 12-hour format
+  final m = dt.minute.toString().padLeft(2, '0'); // Add leading zero to minutes
+  final ap = dt.hour >= 12 ? 'PM' : 'AM'; // Determine AM/PM
+
+  final time = '$h:$m $ap'; // Format time as hh:mm AM/PM
+
   if (sameDay) {
-    final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-    final m = dt.minute.toString().padLeft(2, '0');
-    final ap = dt.hour >= 12 ? 'PM' : 'AM';
-    return 'Today • $h:$m $ap';
+    return 'Today • $time';
   }
 
-  return '${_month(dt.month)} ${dt.day}, ${dt.year}';
+  return '${_month(dt.month)} ${dt.day}, ${dt.year} • $time';
 }
 
 String _month(int m) =>

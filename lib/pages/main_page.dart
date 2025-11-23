@@ -106,6 +106,12 @@ class _MainPageState extends State<MainPage> {
               child: Leaderboard(repo: widget.repo),
             ),
 
+            // Check-in button (moved here)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              child: GymCheckInButton(userId: widget.userId, repo: widget.repo),
+            ),
+
             // Workouts header
             const Padding(
               padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -171,12 +177,6 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ],
               ),
-            ),
-
-            // Check-in button
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              child: GymCheckInButton(userId: widget.userId, repo: widget.repo),
             ),
           ],
         ),

@@ -39,6 +39,7 @@ dependencies:
   cloud_firestore: ^6.0.0
   geolocator: ^14.0.2
   google_sign_in: ^6.3.0
+  flutter_native_splash: ^2.4.0
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,7 @@ flutter:
     - assets/google_logo.png
     - assets/gym_royale_logo.png
     - assets/app_icon.png
+    - assets/splash_icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -99,3 +101,9 @@ flutter_icons:
   android: true
   ios: true
   image_path: "assets/app_icon.png"
+
+flutter_native_splash:
+  color: "#000000"
+  image: assets/splash_icon.png
+  android: true
+  ios: true

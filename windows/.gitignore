@@ -1,29 +1,17 @@
-# Flutter/Dart
-.dart_tool/
-.packages
-pubspec.lock
-build/
-.flutter-plugins
-.flutter-plugins-dependencies
-.flutter-versions
-.flutter-ephemeral/
+flutter/ephemeral/
 
-# VS Code
-.vscode/
-
-# Visual Studio
+# Visual Studio user-specific files.
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+
+# Visual Studio build-related files.
 x64/
 x86/
+
+# Visual Studio cache files
+# files ending in .cache can be ignored
 *.[Cc]ache
+# but keep track of directories ending in .cache
 !*.[Cc]ache/
-
-# MacOS
-.DS_Store
-
-# Firebase secrets (optional, depending on project)
-# google-services.json
-# GoogleService-Info.plist

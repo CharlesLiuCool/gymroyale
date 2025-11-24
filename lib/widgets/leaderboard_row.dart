@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
 
 class LeaderboardRow extends StatelessWidget {
   final User user;
+  final int rank; // dynamically passed in
 
-  const LeaderboardRow({super.key, required this.user});
+  const LeaderboardRow({super.key, required this.user, required this.rank});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class LeaderboardRow extends StatelessWidget {
           CircleAvatar(
             backgroundColor: AppColors.accent,
             child: Text(
-              '${user.rank}',
+              '$rank', // use dynamic rank
               style: const TextStyle(color: AppColors.textPrimary),
             ),
           ),
@@ -36,12 +37,36 @@ class LeaderboardRow extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            '${user.points} pts',
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-            ),
+          Row(
+            children: [
+              Text(
+                '${user.points} pts',
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (user.streakCount != null && user.streakCount! > 0)
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.local_fire_department,
+                      color: Colors.orange,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${user.streakCount}',
+                      style: const TextStyle(
+                        color: Colors.orange,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
           ),
         ],
       ),

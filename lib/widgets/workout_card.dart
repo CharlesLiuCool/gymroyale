@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:gymroyale/models/cardio_workout.dart';
+import 'package:gymroyale/models/lift_workout.dart';
 import '../models/workout_activity.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
 
 class WorkoutCard extends StatelessWidget {
   final WorkoutActivity activity;
-  const WorkoutCard({super.key, required this.activity});
+  final VoidCallback onDelete;
+
+  const WorkoutCard({
+    super.key,
+    required this.activity,
+    required this.onDelete,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
     return Card(
       color: AppColors.card,
       clipBehavior: Clip.hardEdge,
@@ -57,49 +62,83 @@ class WorkoutCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.more_horiz, color: AppColors.textSecondary),
+                PopupMenuButton<String>(
+                  icon: const Icon(
+                    Icons.more_horiz,
+                    color: AppColors.textSecondary,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') {
+                      // TODO: handle edit action
+                      // e.g. Navigator.push(...) to an edit screen
+                    } else if (value == 'delete') {
+                      onDelete(); // Call the delete callback
+                    }
+                  },
+                  itemBuilder:
+                      (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 18),
+                              SizedBox(width: 8),
+                              Text('Edit'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 18, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text('Delete'),
+                            ],
+                          ),
+                        ),
+                      ],
+                ),
               ],
             ),
           ),
 
           // Stats row
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
             child: Row(
               children: [
-                Expanded(
-                  child: StatChip(
-                    label: 'Time moving',
-                    value: _formatDuration(activity.movingTime),
+                if (activity is CardioWorkout)
+                  Expanded(
+                    child: StatChip(
+                      label: 'Duration',
+                      value: _formatDuration(
+                        (activity as CardioWorkout).duration,
+                      ),
+                    ),
+                  )
+                else if (activity is LiftWorkout) ...[
+                  Expanded(
+                    child: StatChip(
+                      label: 'Weight',
+                      value: '${(activity as LiftWorkout).weight} lbs',
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // Footer
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-            child: Row(
-              children: [
-                _ActionButton(
-                  icon: Icons.favorite_border,
-                  label: '${activity.likeCount}',
-                ),
-                const SizedBox(width: 4),
-                _ActionButton(
-                  icon: Icons.mode_comment_outlined,
-                  label: '${activity.commentsCount}',
-                ),
-                const Spacer(),
-                TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.share, color: AppColors.textSecondary),
-                  label: const Text(
-                    'Share',
-                    style: TextStyle(color: AppColors.textSecondary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: StatChip(
+                      label: 'Sets',
+                      value: '${(activity as LiftWorkout).sets}',
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: StatChip(
+                      label: 'Reps',
+                      value: '${(activity as LiftWorkout).reps}',
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -109,7 +148,6 @@ class WorkoutCard extends StatelessWidget {
   }
 }
 
-// Subcomponent
 class StatChip extends StatelessWidget {
   final String label;
   final String value;
@@ -117,9 +155,6 @@ class StatChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
@@ -151,37 +186,12 @@ class StatChip extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _ActionButton({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return TextButton.icon(
-      onPressed: () {},
-      icon: Icon(icon, size: 20, color: AppColors.textSecondary),
-      label: Text(
-        label,
-        style: const TextStyle(color: AppColors.textSecondary),
-      ),
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.textSecondary,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-      ),
-    );
-  }
-}
-
 IconData _iconFor(ActivityType t) {
   switch (t) {
     case ActivityType.lift:
       return Icons.fitness_center;
     case ActivityType.cardio:
       return Icons.directions_run;
-    case ActivityType.blend:
-      return Icons.fitbit;
   }
 }
 
@@ -189,13 +199,18 @@ String _friendlyDate(DateTime dt) {
   final now = DateTime.now();
   final sameDay =
       now.year == dt.year && now.month == dt.month && now.day == dt.day;
+
+  final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12; // Convert to 12-hour format
+  final m = dt.minute.toString().padLeft(2, '0'); // Add leading zero to minutes
+  final ap = dt.hour >= 12 ? 'PM' : 'AM'; // Determine AM/PM
+
+  final time = '$h:$m $ap'; // Format time as hh:mm AM/PM
+
   if (sameDay) {
-    final h = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-    final m = dt.minute.toString().padLeft(2, '0');
-    final ap = dt.hour >= 12 ? 'PM' : 'AM';
-    return 'Today • $h:$m $ap';
+    return 'Today • $time';
   }
-  return '${_month(dt.month)} ${dt.day}, ${dt.year}';
+
+  return '${_month(dt.month)} ${dt.day}, ${dt.year} • $time';
 }
 
 String _month(int m) =>
@@ -214,7 +229,8 @@ String _month(int m) =>
       'Dec',
     ][m - 1];
 
-String _formatDuration(Duration d) {
+String _formatDuration(Duration? d) {
+  if (d == null) return '—';
   final h = d.inHours;
   final m = d.inMinutes % 60;
   final s = d.inSeconds % 60;

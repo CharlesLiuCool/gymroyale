@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../repositories/leaderboard_repository.dart';
-import '../app_colors.dart';
+import '../theme/app_colors.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+// CONFIG:
+// Minimum distance in meters to be considered "at the gym"
+// Easy to toggle for testing
+const double minDistance = 15000;
+// Disable gym checkin for testing
+const bool disableCheck = true;
 
 class GymCheckInButton extends StatefulWidget {
   final String userId;
@@ -51,12 +59,42 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
 
       setState(() => _distanceMeters = distance);
 
-      if (distance <= 200) {
-        await widget.repo.addPoints(widget.userId, 10);
-        _showNotification("Checked in at the gym! +10 points");
-      } else {
+      final userRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId);
+
+      final doc = await userRef.get();
+      final data = doc.data();
+
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      final lastCheckIn = (data?['lastCheckIn'] as Timestamp?)?.toDate();
+      final lastDate =
+          lastCheckIn != null
+              ? DateTime(lastCheckIn.year, lastCheckIn.month, lastCheckIn.day)
+              : null;
+
+      final diff = lastDate != null ? today.difference(lastDate).inDays : null;
+
+      // check distance
+      if (!disableCheck && distance > minDistance) {
         _showNotification(
-          "You’re too far from the gym (${distance.toStringAsFixed(1)} m)",
+          "You're too far from the gym (${distance.toStringAsFixed(1)} m)",
+        );
+      }
+      // already checked in
+      else if (!disableCheck && diff == 0) {
+        _showNotification("You've already checked in today!");
+      }
+      // diff == null is first sign-in case, diff == 1 is checked in yesterday
+      else if (disableCheck || diff == null || diff >= 1) {
+        final streak = await updateStreak(widget.userId);
+        final points = 10 + 5 * streak;
+
+        await widget.repo.addPoints(widget.userId, points);
+        _showNotification(
+          "Checked in at the gym! +$points points (Streak: $streak)",
         );
       }
     } catch (e) {
@@ -79,6 +117,39 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
         ),
       );
     }
+  }
+
+  Future<int> updateStreak(String userId) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+    final doc = await userRef.get();
+    final data = doc.data();
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final lastCheckIn = (data?['lastCheckIn'] as Timestamp?)?.toDate();
+    final lastDate =
+        lastCheckIn != null
+            ? DateTime(lastCheckIn.year, lastCheckIn.month, lastCheckIn.day)
+            : null;
+
+    int newStreak = 1;
+
+    if (lastDate != null) {
+      final diff = today.difference(lastDate).inDays;
+      if (diff == 1) {
+        newStreak = (data?['streakCount'] ?? 0) + 1;
+      } else if (diff == 0) {
+        newStreak = data?['streakCount'] ?? 1; // already checked in today
+      }
+    }
+
+    await userRef.update({
+      'streakCount': newStreak,
+      'lastCheckIn': Timestamp.fromDate(now),
+    });
+
+    return newStreak;
   }
 
   @override

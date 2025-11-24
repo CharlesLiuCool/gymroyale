@@ -15,23 +15,49 @@ class WorkoutRepository {
 
     return snapshot.docs.map((doc) {
       final data = doc.data();
-      return WorkoutActivity(
-        id: doc.id,
-        title: data['title'] ?? '',
-        activityType: ActivityType.values.firstWhere(
-          (e) => e.name == data['activityType'],
-          orElse: () => ActivityType.lift,
-        ),
-        startedAt: (data['startedAt'] as Timestamp).toDate(),
-        movingTime: Duration(seconds: data['movingTime'] ?? 0),
-        likeCount: data['likeCount'] ?? 0,
-        commentsCount: data['commentsCount'] ?? 0,
-      );
+      data['id'] = doc.id;
+      return parseWorkout(data);
     }).toList();
   }
 
   Future<void> addWorkout(String userId, WorkoutActivity workout) async {
     final ref = _db.collection('users').doc(userId).collection('workouts');
     await ref.add(workout.toMap());
+  }
+
+  Future<void> deleteWorkout(String userId, String workoutId) async {
+    final ref = _db
+        .collection('users')
+        .doc(userId)
+        .collection('workouts')
+        .doc(workoutId);
+
+    await ref.delete();
+  }
+
+  Future<void> updateWorkout(String userId, WorkoutActivity workout) async {
+    final ref = _db
+        .collection('users')
+        .doc(userId)
+        .collection('workouts')
+        .doc(workout.id);
+
+    await ref.update(workout.toMap());
+  }
+
+  Stream<List<WorkoutActivity>> watchUserWorkouts(String userId) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('workouts')
+        .orderBy('startedAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return parseWorkout(data);
+          }).toList();
+        });
   }
 }

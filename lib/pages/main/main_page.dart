@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:gymroyale/pages/main/tabs/main_tab.dart';
+import 'package:gymroyale/pages/main/tabs/workout_tab.dart';
 import 'package:gymroyale/repositories/leaderboard_repository.dart';
 import 'package:gymroyale/repositories/workout_repository.dart';
 import 'package:gymroyale/models/workout_activity.dart';
@@ -34,6 +36,20 @@ class _MainPageState extends State<MainPage> {
     _loadWorkouts();
   }
 
+  // TEMPORARY, OR FOR ANY UNIMPLEMENTED TABS
+  Widget _comingSoon(String label) {
+    return Center(
+      child: Text(
+        "$label (coming soon)",
+        style: const TextStyle(
+          color: Colors.white70,
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
   Future<void> _loadWorkouts() async {
     final workoutRepo = WorkoutRepository();
     final workouts = await workoutRepo.fetchUserWorkouts(widget.userId);
@@ -65,143 +81,6 @@ class _MainPageState extends State<MainPage> {
     await FirebaseAuth.instance.signOut();
   }
 
-  Widget _buildCurrentTab() {
-    switch (_selectedIndex) {
-      case 0:
-        return SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: Text(
-                  'Leaderboard',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 4,
-                ),
-                child: Leaderboard(repo: widget.repo),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
-                ),
-                child: GymCheckInButton(
-                  userId: widget.userId,
-                  repo: widget.repo,
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-                child: Text(
-                  'Workouts',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Stack(
-                  children: [
-                    _loadingWorkouts
-                        ? const Center(child: CircularProgressIndicator())
-                        : _workouts.isNotEmpty
-                        ? ListView.separated(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          itemCount: _workouts.length,
-                          separatorBuilder:
-                              (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final activity = _workouts[index];
-                            return WorkoutCard(
-                              activity: activity,
-                              onDelete: () => _deleteWorkout(activity.id),
-                            );
-                          },
-                        )
-                        : const Center(
-                          child: Text(
-                            'No workouts yet',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                    Positioned(
-                      bottom: 16,
-                      right: 16,
-                      child: FloatingActionButton(
-                        backgroundColor: AppColors.accent,
-                        child: const Icon(Icons.add, color: Colors.white),
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
-                            builder:
-                                (_) => AddWorkoutSheet(
-                                  userId: widget.userId,
-                                  onWorkoutAdded: _loadWorkouts,
-                                ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-
-      case 1:
-        return const Center(
-          child: Text(
-            'Leaderboard (coming soon)',
-            style: TextStyle(color: Colors.white),
-          ),
-        );
-      case 2:
-        return const Center(
-          child: Text(
-            'Workout Feed (coming soon)',
-            style: TextStyle(color: Colors.white),
-          ),
-        );
-      case 3:
-        return const Center(
-          child: Text(
-            'Progress Graph (coming soon)',
-            style: TextStyle(color: Colors.white),
-          ),
-        );
-      case 4:
-        return const Center(
-          child: Text(
-            'AI Help (coming soon)',
-            style: TextStyle(color: Colors.white),
-          ),
-        );
-      default:
-        return const SizedBox.shrink();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -227,7 +106,18 @@ class _MainPageState extends State<MainPage> {
         ),
         actions: const [SettingsMenu()],
       ),
-      body: _buildCurrentTab(),
+
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: [
+          MainTab(userId: widget.userId, repo: widget.repo),
+          _comingSoon("Leaderboard"), // TAB 1
+          WorkoutTab(userId: widget.userId),
+          _comingSoon("Progress Graph"), // TAB 3
+          _comingSoon("AI Help"), // TAB 4
+        ],
+      ),
+
       bottomNavigationBar: NavigationMenu(
         currentIndex: _selectedIndex,
         onItemTapped: (i) => setState(() => _selectedIndex = i),

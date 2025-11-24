@@ -44,4 +44,20 @@ class WorkoutRepository {
 
     await ref.update(workout.toMap());
   }
+
+  Stream<List<WorkoutActivity>> watchUserWorkouts(String userId) {
+    return _db
+        .collection('users')
+        .doc(userId)
+        .collection('workouts')
+        .orderBy('startedAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return parseWorkout(data);
+          }).toList();
+        });
+  }
 }

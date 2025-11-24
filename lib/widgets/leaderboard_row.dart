@@ -4,8 +4,9 @@ import '../theme/app_colors.dart';
 
 class LeaderboardRow extends StatelessWidget {
   final User user;
+  final int rank; // dynamically passed in
 
-  const LeaderboardRow({super.key, required this.user});
+  const LeaderboardRow({super.key, required this.user, required this.rank});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class LeaderboardRow extends StatelessWidget {
           CircleAvatar(
             backgroundColor: AppColors.accent,
             child: Text(
-              '${user.rank}',
+              '$rank', // use dynamic rank
               style: const TextStyle(color: AppColors.textPrimary),
             ),
           ),

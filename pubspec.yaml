@@ -40,6 +40,8 @@ dependencies:
   geolocator: ^14.0.2
   google_sign_in: ^6.3.0
   flutter_native_splash: ^2.4.0
+  rxdart: ^0.27.7
+  fl_chart: ^0.69.0
 
 dev_dependencies:
   flutter_test:

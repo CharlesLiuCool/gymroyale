@@ -49,11 +49,7 @@ class _LeaderboardState extends State<Leaderboard> {
           );
         }
 
-        // Create a ranked list without mutating `User`
-        final users = List<User>.generate(
-          snapshot.data!.length,
-          (i) => snapshot.data![i].copyWith(rank: i + 1),
-        );
+        final users = snapshot.data!;
 
         final calculatedHeight = users.length * rowHeight;
         final containerHeight =
@@ -82,7 +78,10 @@ class _LeaderboardState extends State<Leaderboard> {
                     final user = users[index];
                     return SizedBox(
                       height: rowHeight,
-                      child: LeaderboardRow(user: user),
+                      child: LeaderboardRow(
+                        user: user,
+                        rank: index + 1, // pass rank dynamically
+                      ),
                     );
                   },
                 ),

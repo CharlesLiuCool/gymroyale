@@ -4,7 +4,6 @@ class User {
   final String id;
   final String name;
   final int points;
-  final int? rank;
   final List<WorkoutActivity>? workouts;
   final int? streakCount;
 
@@ -12,7 +11,6 @@ class User {
     required this.id,
     required this.name,
     required this.points,
-    this.rank,
     this.workouts,
     this.streakCount,
   });
@@ -49,7 +47,6 @@ class User {
     String? id,
     String? name,
     int? points,
-    int? rank,
     List<WorkoutActivity>? workouts,
     int? streakCount,
   }) {
@@ -57,7 +54,6 @@ class User {
       id: id ?? this.id,
       name: name ?? this.name,
       points: points ?? this.points,
-      rank: rank ?? this.rank,
       workouts: workouts ?? this.workouts,
       streakCount: streakCount ?? this.streakCount,
     );
@@ -74,6 +70,7 @@ class User {
                   .map((w) => parseWorkout(Map<String, dynamic>.from(w)))
                   .toList()
               : null,
+      streakCount: json['streakCount'] as int?,
     );
   }
 

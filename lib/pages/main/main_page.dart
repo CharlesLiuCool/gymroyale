@@ -7,11 +7,8 @@ import 'package:gymroyale/pages/main/tabs/workout_tab.dart';
 import 'package:gymroyale/repositories/leaderboard_repository.dart';
 import 'package:gymroyale/repositories/workout_repository.dart';
 import 'package:gymroyale/models/workout_activity.dart';
-import 'package:gymroyale/widgets/gym_checkin_button.dart';
-import 'package:gymroyale/widgets/add_workout.dart';
-import 'package:gymroyale/widgets/leaderboard.dart';
 import 'package:gymroyale/widgets/settings_menu.dart';
-import '../../widgets/workout_card.dart';
+import 'package:gymroyale/pages/leaderboard/leaderboard_page.dart'; // <- NEW
 import '../../widgets/navigation_menu.dart';
 import '../../theme/app_colors.dart';
 
@@ -112,7 +109,10 @@ class _MainPageState extends State<MainPage> {
         index: _selectedIndex,
         children: [
           MainTab(userId: widget.userId, repo: widget.repo),
-          _comingSoon("Leaderboard"), // TAB 1
+          LeaderboardPage(               // <- NEW TAB CONTENT
+            userId: widget.userId,
+            repo: widget.repo,
+          ), // TAB 1
           WorkoutTab(userId: widget.userId),
           ProgressGraphTab(userId: widget.userId),
           _comingSoon("AI Help"), // TAB 4

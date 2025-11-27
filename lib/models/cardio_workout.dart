@@ -6,15 +6,12 @@ class CardioWorkout extends WorkoutActivity {
   final Duration duration;
 
   CardioWorkout({
-    required String id,
-    required String title,
-    required DateTime startedAt,
+    required super.id,
+    required super.title,
+    required super.startedAt,
     required this.duration,
   }) : super(
-         id: id,
-         title: title,
          activityType: ActivityType.cardio,
-         startedAt: startedAt,
        );
 
   @override

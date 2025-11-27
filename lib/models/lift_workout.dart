@@ -8,17 +8,14 @@ class LiftWorkout extends WorkoutActivity {
   final int reps;
 
   LiftWorkout({
-    required String id,
-    required String title,
-    required DateTime startedAt,
+    required super.id,
+    required super.title,
+    required super.startedAt,
     required this.weight,
     required this.sets,
     required this.reps,
   }) : super(
-         id: id,
-         title: title,
          activityType: ActivityType.lift,
-         startedAt: startedAt,
        );
 
   @override

@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // CONFIG:
 // Minimum distance in meters to be considered "at the gym"
 // Easy to toggle for testing
-const double minDistance = 15000;
+const double minDistance = 200;
 // Disable gym checkin for testing
 const bool disableCheck = true;
 

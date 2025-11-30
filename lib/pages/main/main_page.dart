@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:gymroyale/pages/main/tabs/main_tab.dart';
 import 'package:gymroyale/pages/main/tabs/progress_graph_tab.dart';
 import 'package:gymroyale/pages/main/tabs/workout_tab.dart';
 import 'package:gymroyale/repositories/leaderboard_repository.dart';
 import 'package:gymroyale/repositories/workout_repository.dart';
 import 'package:gymroyale/models/workout_activity.dart';
-import 'package:gymroyale/widgets/gym_checkin_button.dart';
-import 'package:gymroyale/widgets/add_workout.dart';
-import 'package:gymroyale/widgets/leaderboard.dart';
 import 'package:gymroyale/widgets/settings_menu.dart';
-import '../../widgets/workout_card.dart';
 import '../../widgets/navigation_menu.dart';
 import '../../theme/app_colors.dart';
 
@@ -60,26 +54,6 @@ class _MainPageState extends State<MainPage> {
         _loadingWorkouts = false;
       });
     }
-  }
-
-  Future<void> _deleteWorkout(String workoutId) async {
-    final repo = WorkoutRepository();
-    await repo.deleteWorkout(widget.userId, workoutId);
-    setState(() {
-      _workouts.removeWhere((w) => w.id == workoutId);
-    });
-  }
-
-  Future<void> _signOut() async {
-    final googleSignIn = GoogleSignIn();
-    try {
-      if (await googleSignIn.isSignedIn()) {
-        await googleSignIn.disconnect();
-      }
-    } catch (e) {
-      debugPrint("Google disconnect error: $e");
-    }
-    await FirebaseAuth.instance.signOut();
   }
 
   @override

@@ -7,11 +7,13 @@ import '../theme/app_colors.dart';
 class WorkoutCard extends StatelessWidget {
   final WorkoutActivity activity;
   final VoidCallback onDelete;
+  final VoidCallback? onEdit; // optional callback for edit
 
   const WorkoutCard({
     super.key,
     required this.activity,
     required this.onDelete,
+    this.onEdit,
   });
 
   @override
@@ -61,7 +63,6 @@ class WorkoutCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
                 PopupMenuButton<String>(
                   icon: const Icon(
                     Icons.more_horiz,
@@ -69,28 +70,27 @@ class WorkoutCard extends StatelessWidget {
                   ),
                   onSelected: (value) {
                     if (value == 'edit') {
-                      // TODO: handle edit action
-                      // e.g. Navigator.push(...) to an edit screen
+                      if (onEdit != null) onEdit!();
                     } else if (value == 'delete') {
-                      onDelete(); // Call the delete callback
+                      onDelete();
                     }
                   },
                   itemBuilder:
                       (context) => [
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'edit',
                           child: Row(
-                            children: [
+                            children: const [
                               Icon(Icons.edit, size: 18),
                               SizedBox(width: 8),
                               Text('Edit'),
                             ],
                           ),
                         ),
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'delete',
                           child: Row(
-                            children: [
+                            children: const [
                               Icon(Icons.delete, size: 18, color: Colors.red),
                               SizedBox(width: 8),
                               Text('Delete'),

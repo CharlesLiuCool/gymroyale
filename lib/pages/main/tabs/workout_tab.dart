@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gymroyale/models/workout_activity.dart';
 import 'package:gymroyale/repositories/workout_repository.dart';
 import 'package:gymroyale/theme/app_colors.dart';
+import 'package:gymroyale/widgets/add_workout.dart';
 import 'package:gymroyale/widgets/workout_card.dart';
 
 class WorkoutTab extends StatelessWidget {
@@ -43,6 +44,22 @@ class WorkoutTab extends StatelessWidget {
               return WorkoutCard(
                 activity: activity,
                 onDelete: () => repo.deleteWorkout(userId, activity.id),
+                onEdit: () {
+                  print('Edit tapped for ${activity.title}');
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder:
+                        (sheetContext) => AddWorkoutSheet(
+                          userId: userId,
+                          workout: activity, // this prefills the sheet
+                          onWorkoutAdded: () {
+                            // just close the sheet; StreamBuilder updates the UI
+                            Navigator.of(sheetContext).pop();
+                          },
+                        ),
+                  );
+                },
               );
             },
           );

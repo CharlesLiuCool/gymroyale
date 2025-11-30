@@ -137,10 +137,16 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
 
     if (lastDate != null) {
       final diff = today.difference(lastDate).inDays;
+
       if (diff == 1) {
+        // Checked in yesterday, increment streak
         newStreak = (data?['streakCount'] ?? 0) + 1;
       } else if (diff == 0) {
-        newStreak = data?['streakCount'] ?? 1; // already checked in today
+        // Already checked in today, keep current streak
+        newStreak = data?['streakCount'] ?? 1;
+      } else if (diff > 1) {
+        // Missed one or more days, reset streak
+        newStreak = 1;
       }
     }
 

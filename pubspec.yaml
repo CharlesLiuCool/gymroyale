@@ -42,6 +42,7 @@ dependencies:
   flutter_native_splash: ^2.4.0
   rxdart: ^0.27.7
   fl_chart: ^0.69.0
+  flutter_markdown: ^0.7.0
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,7 @@ flutter:
     - assets/gym_royale_logo.png
     - assets/app_icon.png
     - assets/splash_icon.png
+    - assets/help.md
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

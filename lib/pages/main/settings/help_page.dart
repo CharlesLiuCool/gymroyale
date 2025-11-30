@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_markdown/flutter_markdown.dart';
-import '../../theme/app_colors.dart';
+import '../../../theme/app_colors.dart';
 
 class HelpPage extends StatefulWidget {
   const HelpPage({super.key});

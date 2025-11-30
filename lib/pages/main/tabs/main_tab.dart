@@ -7,6 +7,7 @@ import 'package:gymroyale/widgets/gym_checkin_button.dart';
 import 'package:gymroyale/widgets/leaderboard.dart';
 import 'package:gymroyale/widgets/workout_card.dart';
 import 'package:gymroyale/theme/app_colors.dart';
+import 'package:gymroyale/widgets/workout_form.dart';
 
 class MainTab extends StatelessWidget {
   final String userId;
@@ -101,6 +102,17 @@ class MainTab extends StatelessWidget {
                                 userId,
                                 activity.id,
                               ),
+                          onEdit: () {
+                            // Open general WorkoutForm in a modal sheet for editing
+                            showWorkoutSheet(
+                              context,
+                              userId,
+                              workout: activity,
+                              onSaved: () {
+                                // no extra logic needed since StreamBuilder auto-updates
+                              },
+                            );
+                          },
                         );
                       },
                     );
@@ -115,15 +127,12 @@ class MainTab extends StatelessWidget {
                     backgroundColor: AppColors.accent,
                     child: const Icon(Icons.add, color: Colors.white),
                     onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder:
-                            (_) => AddWorkoutSheet(
-                              userId: userId,
-                              onWorkoutAdded: () {}, // no reload needed anymore
-                            ),
+                      showWorkoutSheet(
+                        context,
+                        userId,
+                        onSaved: () {
+                          // StreamBuilder updates automatically
+                        },
                       );
                     },
                   ),

@@ -31,13 +31,30 @@ void main() {
         (tester) async {
       await tester.pumpWidget(_buildTestableWidget());
 
-      // SafeArea wrapper
-      expect(find.byType(SafeArea), findsOneWidget);
+      // SafeArea wrapper exists
+      final safeAreaFinder = find.byType(SafeArea);
+      expect(safeAreaFinder, findsOneWidget);
 
-      // Padding wrapper
-      final padding = tester.widget<Padding>(find.byType(Padding));
-      expect(padding.padding,
-          const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8.0));
+      // Look for a Padding *inside* the SafeArea that has the expected padding.
+      final paddingWidgets = tester
+          .widgetList<Padding>(
+            find.descendant(
+              of: safeAreaFinder,
+              matching: find.byType(Padding),
+            ),
+          )
+          .toList();
+
+      expect(paddingWidgets, isNotEmpty);
+
+      final expectedPadding =
+          const EdgeInsets.symmetric(horizontal: 32.0, vertical: 8.0);
+
+      // At least one of the Padding widgets should have this padding.
+      final hasExpected = paddingWidgets
+          .any((p) => p.padding == expectedPadding);
+
+      expect(hasExpected, isTrue);
 
       // ElevatedButton exists
       expect(find.byType(ElevatedButton), findsOneWidget);

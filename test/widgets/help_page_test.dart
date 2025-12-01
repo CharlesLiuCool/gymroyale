@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:gymroyale/pages/main/help_page.dart';
+import 'package:gymroyale/pages/main/settings/help_page.dart';
 
 void main() {
   testWidgets('HelpPage shows FAQ items', (tester) async {

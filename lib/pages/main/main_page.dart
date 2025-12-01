@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gymroyale/pages/main/tabs/leaderboard_tab.dart';
 import 'package:gymroyale/pages/main/tabs/main_tab.dart';
 import 'package:gymroyale/pages/main/tabs/progress_graph_tab.dart';
 import 'package:gymroyale/pages/main/tabs/workout_tab.dart';
@@ -86,7 +87,7 @@ class _MainPageState extends State<MainPage> {
         index: _selectedIndex,
         children: [
           MainTab(userId: widget.userId, repo: widget.repo),
-          _comingSoon("Leaderboard"), // TAB 1
+          LeaderboardTab(userId: widget.userId, repo: widget.repo),
           WorkoutTab(userId: widget.userId),
           ProgressGraphTab(userId: widget.userId),
           _comingSoon("AI Help"), // TAB 4

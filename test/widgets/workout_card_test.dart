@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:gymroyale/widgets/workout_card.dart';
-import 'package:gymroyale/models/workout_activity.dart';
 import 'package:gymroyale/models/lift_workout.dart';
 import 'package:gymroyale/models/cardio_workout.dart';
 
@@ -15,7 +14,6 @@ void main() {
       bool deleteCalled = false;
 
       final liftActivity = LiftWorkout(
-        // Adjust these named args to match your actual model
         id: 'lift-1',
         title: 'Bench Press',
         startedAt: DateTime.now(),

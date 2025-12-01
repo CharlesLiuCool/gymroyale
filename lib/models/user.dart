@@ -6,6 +6,7 @@ class User {
   final int points;
   final List<WorkoutActivity>? workouts;
   final int? streakCount;
+  final List<String> friends;
 
   User({
     required this.id,
@@ -13,6 +14,7 @@ class User {
     required this.points,
     this.workouts,
     this.streakCount,
+    this.friends = const [],
   });
 
   factory User.fromMap(Map<String, dynamic> map, String id) {
@@ -21,7 +23,7 @@ class User {
       name: map['name'] as String? ?? 'User',
       points:
           map['points'] is int
-              ? map['points'] as int
+              ? map['points']
               : int.tryParse(map['points'].toString()) ?? 0,
       workouts:
           map['workouts'] != null
@@ -30,6 +32,7 @@ class User {
                   .toList()
               : null,
       streakCount: map['streakCount'] as int?,
+      friends: map['friends'] != null ? List<String>.from(map['friends']) : [],
     );
   }
 
@@ -40,6 +43,7 @@ class User {
       'streakCount': streakCount,
       if (workouts != null)
         'workouts': workouts!.map((w) => w.toMap()).toList(),
+      'friends': friends,
     };
   }
 
@@ -49,6 +53,7 @@ class User {
     int? points,
     List<WorkoutActivity>? workouts,
     int? streakCount,
+    List<String>? friends,
   }) {
     return User(
       id: id ?? this.id,
@@ -56,6 +61,7 @@ class User {
       points: points ?? this.points,
       workouts: workouts ?? this.workouts,
       streakCount: streakCount ?? this.streakCount,
+      friends: friends ?? this.friends,
     );
   }
 
@@ -71,6 +77,8 @@ class User {
                   .toList()
               : null,
       streakCount: json['streakCount'] as int?,
+      friends:
+          json['friends'] != null ? List<String>.from(json['friends']) : [],
     );
   }
 
@@ -80,5 +88,6 @@ class User {
     'points': points,
     'streakCount': streakCount,
     if (workouts != null) 'workouts': workouts!.map((w) => w.toJson()).toList(),
+    'friends': friends,
   };
 }

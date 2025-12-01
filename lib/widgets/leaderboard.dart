@@ -8,12 +8,14 @@ class Leaderboard extends StatefulWidget {
   final double initialHeight;
   final double expandedHeight;
   final dynamic repo;
+  final List<String>? filterIds; // NEW: optional filter by user IDs
 
   const Leaderboard({
     super.key,
     this.initialHeight = 180,
     this.expandedHeight = 400,
     required this.repo,
+    this.filterIds,
   });
 
   @override
@@ -49,7 +51,22 @@ class _LeaderboardState extends State<Leaderboard> {
           );
         }
 
-        final users = snapshot.data!;
+        // Filter by friend IDs if provided
+        final users =
+            widget.filterIds != null
+                ? snapshot.data!
+                    .where((u) => widget.filterIds!.contains(u.id))
+                    .toList()
+                : snapshot.data!;
+
+        if (users.isEmpty) {
+          return const Center(
+            child: Text(
+              "No friends yet",
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          );
+        }
 
         final calculatedHeight = users.length * rowHeight;
         final containerHeight =
@@ -78,16 +95,12 @@ class _LeaderboardState extends State<Leaderboard> {
                     final user = users[index];
                     return SizedBox(
                       height: rowHeight,
-                      child: LeaderboardRow(
-                        user: user,
-                        rank: index + 1, // pass rank dynamically
-                      ),
+                      child: LeaderboardRow(user: user, rank: index + 1),
                     );
                   },
                 ),
               ),
             ),
-
             if (users.length >= 4)
               TextButton(
                 onPressed: _toggleExpanded,

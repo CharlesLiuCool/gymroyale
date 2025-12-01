@@ -10,7 +10,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  const bool useEmulators = true; // Turn off for production
+  const bool useEmulators = false; // Turn off for production
 
   if (useEmulators) {
     // Firestore

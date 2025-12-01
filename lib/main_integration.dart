@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,6 +18,7 @@ Future<void> _ensureFirebaseInitializedForTests() async {
     // When running on Android emulator, host should be 10.0.2.2
     // Port comes from firebase.json ("auth": { "port": 9099 })
     FirebaseAuth.instance.useAuthEmulator('10.0.2.2', 9099);
+    FirebaseFirestore.instance.useFirestoreEmulator('10.0.2.2', 8080);
   }
 }
 

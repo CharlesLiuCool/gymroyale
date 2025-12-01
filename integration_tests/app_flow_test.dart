@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -32,13 +33,25 @@ void main() {
   });
 
   testWidgets('starts app with authenticated emulator user', (tester) async {
-    // This main() uses the emulator-configured Firebase
+    // Boot app using emulator-config main
     await app.main();
 
-    // Let the widget tree build and AuthGate react to auth state
+    // Let it build and navigate based on auth state
     await tester.pumpAndSettle();
 
-    // AuthGate should route past LoginPage into your main UI
+    // 1. We should be on UsernameSetupPage first
+    expect(find.text('Choose a Username'), findsOneWidget);
+
+    // 2. Enter a username
+    await tester.enterText(find.byType(TextField), 'TestUser');
+
+    // 3. Tap "Continue"
+    await tester.tap(find.text('Continue'));
+
+    // 4. Wait for Firestore write + navigation to complete
+    await tester.pumpAndSettle();
+
+    // 5. Now we expect to be on MainPage with "Gym Royale" AppBar title
     expect(find.text('Gym Royale'), findsOneWidget);
 
     // From here you can test tabs, workouts, etc.

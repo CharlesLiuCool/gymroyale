@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gymroyale/models/cardio_workout.dart';
 import 'package:gymroyale/models/lift_workout.dart';
-import 'package:gymroyale/repositories/workout_repository.dart';
 import 'package:gymroyale/models/workout_activity.dart';
+import 'package:gymroyale/repositories/workout_repository.dart';
 import '../theme/app_colors.dart';
 
 class WorkoutSheet extends StatefulWidget {
@@ -23,36 +24,62 @@ class WorkoutSheet extends StatefulWidget {
 
 class _WorkoutSheetState extends State<WorkoutSheet> {
   final _formKey = GlobalKey<FormState>();
-  String _title = '';
-  ActivityType _activityType = ActivityType.lift;
-
-  // Cardio
-  int _durationMinutes = 30;
-
-  // Lift
-  double _weight = 0;
-  int _sets = 3;
-  int _reps = 10;
-
   bool _saving = false;
+  bool _loadingDefaults = true;
+
+  // Controllers
+  final _titleController = TextEditingController();
+  final _durationController = TextEditingController();
+  final _weightController = TextEditingController();
+  final _setsController = TextEditingController();
+  final _repsController = TextEditingController();
+
+  ActivityType _activityType = ActivityType.lift;
 
   @override
   void initState() {
     super.initState();
+    _initValues();
+  }
+
+  Future<void> _initValues() async {
     if (widget.workout != null) {
-      _title = widget.workout!.title;
+      // Editing existing workout
+      _titleController.text = widget.workout!.title;
       _activityType = widget.workout!.activityType;
+
       if (_activityType == ActivityType.cardio &&
           widget.workout is CardioWorkout) {
-        _durationMinutes = (widget.workout as CardioWorkout).duration.inMinutes;
+        _durationController.text =
+            (widget.workout as CardioWorkout).duration.inMinutes.toString();
       } else if (_activityType == ActivityType.lift &&
           widget.workout is LiftWorkout) {
         final lift = widget.workout as LiftWorkout;
-        _weight = lift.weight;
-        _sets = lift.sets;
-        _reps = lift.reps;
+        _weightController.text = lift.weight.toString();
+        _setsController.text = lift.sets.toString();
+        _repsController.text = lift.reps.toString();
       }
+    } else {
+      // Adding new workout → fetch user defaults
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.userId)
+              .get();
+      final data = doc.data();
+
+      _titleController.text = '';
+      _weightController.text = (data?['defaultLiftWeight'] ?? 0).toString();
+      _setsController.text = (data?['defaultLiftSets'] ?? 3).toString();
+      _repsController.text = (data?['defaultLiftReps'] ?? 10).toString();
+      _durationController.text =
+          (data?['defaultCardioDuration'] ?? 30).toString();
+
+      // Default activity type for new workouts
+      _activityType = ActivityType.lift;
     }
+
+    setState(() => _loadingDefaults = false);
   }
 
   Future<void> _saveWorkout() async {
@@ -66,9 +93,11 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
     if (_activityType == ActivityType.cardio) {
       final workout = CardioWorkout(
         id: widget.workout?.id ?? '',
-        title: _title,
+        title: _titleController.text,
         startedAt: now,
-        duration: Duration(minutes: _durationMinutes),
+        duration: Duration(
+          minutes: int.tryParse(_durationController.text) ?? 30,
+        ),
       );
       if (widget.workout != null) {
         await repo.updateWorkout(widget.userId, workout);
@@ -78,11 +107,11 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
     } else {
       final workout = LiftWorkout(
         id: widget.workout?.id ?? '',
-        title: _title,
+        title: _titleController.text,
         startedAt: now,
-        weight: _weight,
-        sets: _sets,
-        reps: _reps,
+        weight: double.tryParse(_weightController.text) ?? 0,
+        sets: int.tryParse(_setsController.text) ?? 3,
+        reps: int.tryParse(_repsController.text) ?? 10,
       );
       if (widget.workout != null) {
         await repo.updateWorkout(widget.userId, workout);
@@ -97,6 +126,12 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loadingDefaults) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.accent),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       height: MediaQuery.of(context).size.height * 0.85,
@@ -122,7 +157,7 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
               const SizedBox(height: 20),
               // Workout name
               TextFormField(
-                initialValue: _title,
+                controller: _titleController,
                 style: const TextStyle(color: AppColors.textPrimary),
                 cursorColor: AppColors.accent,
                 decoration: const InputDecoration(
@@ -135,7 +170,6 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
                     borderSide: BorderSide(color: AppColors.accent),
                   ),
                 ),
-                onSaved: (v) => _title = v ?? '',
                 validator:
                     (v) => (v == null || v.isEmpty) ? 'Enter a name' : null,
               ),
@@ -170,15 +204,37 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
                           ),
                         )
                         .toList(),
-                onChanged:
-                    (v) =>
-                        setState(() => _activityType = v ?? ActivityType.lift),
+                onChanged: (v) {
+                  setState(() {
+                    _activityType = v ?? ActivityType.lift;
+                    // Reset fields when switching activity
+                    if (_activityType == ActivityType.cardio) {
+                      _durationController.text =
+                          _durationController.text.isEmpty
+                              ? '30'
+                              : _durationController.text;
+                    } else {
+                      _weightController.text =
+                          _weightController.text.isEmpty
+                              ? '0'
+                              : _weightController.text;
+                      _setsController.text =
+                          _setsController.text.isEmpty
+                              ? '3'
+                              : _setsController.text;
+                      _repsController.text =
+                          _repsController.text.isEmpty
+                              ? '10'
+                              : _repsController.text;
+                    }
+                  });
+                },
               ),
               const SizedBox(height: 16),
               // Cardio or Lift fields
               if (_activityType == ActivityType.cardio)
                 TextFormField(
-                  initialValue: _durationMinutes.toString(),
+                  controller: _durationController,
                   style: const TextStyle(color: AppColors.textPrimary),
                   cursorColor: AppColors.accent,
                   decoration: const InputDecoration(
@@ -186,12 +242,10 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
                     labelStyle: TextStyle(color: AppColors.textSecondary),
                   ),
                   keyboardType: TextInputType.number,
-                  onSaved:
-                      (v) => _durationMinutes = int.tryParse(v ?? '30') ?? 30,
                 )
               else ...[
                 TextFormField(
-                  initialValue: _weight.toString(),
+                  controller: _weightController,
                   style: const TextStyle(color: AppColors.textPrimary),
                   cursorColor: AppColors.accent,
                   decoration: const InputDecoration(
@@ -199,11 +253,10 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
                     labelStyle: TextStyle(color: AppColors.textSecondary),
                   ),
                   keyboardType: TextInputType.number,
-                  onSaved: (v) => _weight = double.tryParse(v ?? '0') ?? 0,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  initialValue: _sets.toString(),
+                  controller: _setsController,
                   style: const TextStyle(color: AppColors.textPrimary),
                   cursorColor: AppColors.accent,
                   decoration: const InputDecoration(
@@ -211,11 +264,10 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
                     labelStyle: TextStyle(color: AppColors.textSecondary),
                   ),
                   keyboardType: TextInputType.number,
-                  onSaved: (v) => _sets = int.tryParse(v ?? '3') ?? 3,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  initialValue: _reps.toString(),
+                  controller: _repsController,
                   style: const TextStyle(color: AppColors.textPrimary),
                   cursorColor: AppColors.accent,
                   decoration: const InputDecoration(
@@ -223,7 +275,6 @@ class _WorkoutSheetState extends State<WorkoutSheet> {
                     labelStyle: TextStyle(color: AppColors.textSecondary),
                   ),
                   keyboardType: TextInputType.number,
-                  onSaved: (v) => _reps = int.tryParse(v ?? '10') ?? 10,
                 ),
               ],
               const SizedBox(height: 32),

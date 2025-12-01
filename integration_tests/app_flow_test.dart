@@ -51,10 +51,9 @@ void main() {
     // 4. Wait for Firestore write + navigation to complete
     await tester.pumpAndSettle();
 
-    // 5. Now we expect to be on MainPage with "Gym Royale" AppBar title
-    expect(find.text('Gym Royale'), findsOneWidget);
-
-    // From here you can test tabs, workouts, etc.
-    // e.g. expect(find.text('Leaderboard (coming soon)'), findsNothing);
+    // AuthGate saw an authenticated emulator user
+    // and routed to UsernameSetupPage
+    expect(find.text('Choose a Username'), findsOneWidget);
+    expect(find.byType(TextField), findsOneWidget);
   });
 }

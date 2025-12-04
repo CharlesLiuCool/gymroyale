@@ -8,7 +8,7 @@ class Leaderboard extends StatefulWidget {
   final double initialHeight;
   final double expandedHeight;
   final dynamic repo;
-  final List<String>? filterIds; // NEW: optional filter by user IDs
+  final List<String>? filterIds;
 
   const Leaderboard({
     super.key,
@@ -24,16 +24,32 @@ class Leaderboard extends StatefulWidget {
 
 class _LeaderboardState extends State<Leaderboard> {
   bool _expanded = false;
+  final ScrollController _scrollController = ScrollController();
 
-  void _toggleExpanded() {
-    setState(() {
-      _expanded = !_expanded;
-    });
+  void _toggleExpanded(List<User> users, double rowHeight) {
+    setState(() => _expanded = !_expanded);
+
+    // Scroll to current user *after* expanding
+    if (_expanded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final index = users.indexWhere(
+          (u) => u.id == widget.repo.currentUserId,
+        );
+
+        if (index != -1) {
+          _scrollController.animateTo(
+            index * rowHeight,
+            duration: const Duration(milliseconds: 450),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final rowHeight = 60.0;
+    final double rowHeight = 60.0;
 
     return StreamBuilder<List<User>>(
       stream: widget.repo.topUsers(limit: 20),
@@ -51,7 +67,7 @@ class _LeaderboardState extends State<Leaderboard> {
           );
         }
 
-        // Filter by friend IDs if provided
+        // Filter by friend list when provided
         final users =
             widget.filterIds != null
                 ? snapshot.data!
@@ -86,6 +102,7 @@ class _LeaderboardState extends State<Leaderboard> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: ListView.builder(
+                  controller: _scrollController,
                   physics:
                       _expanded
                           ? const AlwaysScrollableScrollPhysics()
@@ -93,17 +110,26 @@ class _LeaderboardState extends State<Leaderboard> {
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     final user = users[index];
+                    final isCurrent =
+                        user.id == widget.repo.currentUserId; // highlight me
+
                     return SizedBox(
                       height: rowHeight,
-                      child: LeaderboardRow(user: user, rank: index + 1),
+                      child: LeaderboardRow(
+                        user: user,
+                        rank: index + 1,
+                        isCurrentUser: isCurrent,
+                      ),
                     );
                   },
                 ),
               ),
             ),
+
+            // Show toggler only when there is something to expand
             if (users.length >= 4)
               TextButton(
-                onPressed: _toggleExpanded,
+                onPressed: () => _toggleExpanded(users, rowHeight),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

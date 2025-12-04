@@ -17,7 +17,8 @@ class QRScannerTab extends StatefulWidget {
 
 class _QRScannerTabState extends State<QRScannerTab>
     with AutomaticKeepAliveClientMixin {
-  MobileScannerController controller = MobileScannerController();
+  final MobileScannerController controller = MobileScannerController();
+  bool isProcessing = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -28,18 +29,40 @@ class _QRScannerTabState extends State<QRScannerTab>
     super.dispose();
   }
 
+  Future<void> _handleScan(String value) async {
+    if (isProcessing) return;
+
+    setState(() => isProcessing = true);
+    controller.stop(); // Stop scanner to prevent multiple detections
+
+    try {
+      widget.onScan(value);
+    } catch (_) {
+      widget.errorCallback("Failed to process QR code");
+    }
+
+    // Give time for dialog animations
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    // Resume scanning
+    if (mounted) {
+      await controller.start();
+      setState(() => isProcessing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    super.build(context); // needed for AutomaticKeepAliveClientMixin
+    super.build(context);
 
     return Stack(
       children: [
         MobileScanner(
           controller: controller,
           onDetect: (barcodeCapture) {
-            final value = barcodeCapture.barcodes.first.rawValue;
-            if (value != null) {
-              widget.onScan(value);
+            final raw = barcodeCapture.barcodes.first.rawValue;
+            if (raw != null) {
+              _handleScan(raw);
             } else {
               widget.errorCallback("Failed to scan QR code");
             }
@@ -54,7 +77,7 @@ class _QRScannerTabState extends State<QRScannerTab>
               padding: const EdgeInsets.all(8),
               color: Colors.black54,
               child: const Text(
-                "Point your camera at a friend’s QR code",
+                "Point your camera at a friend's QR code",
                 style: TextStyle(color: Colors.white),
               ),
             ),

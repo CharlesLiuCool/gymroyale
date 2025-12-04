@@ -11,7 +11,7 @@ class UserHistory {
     required this.history,
   });
 
-  /// Sort history by timestamp ascending for graphing
+  // Sort history by timestamp ascending for graphing
   UserHistory sorted() {
     final sortedHistory = [...history]
       ..sort((a, b) => a.timestamp.compareTo(b.timestamp));

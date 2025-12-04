@@ -38,7 +38,10 @@ class _LeaderboardTabState extends State<LeaderboardTab> {
       final friends = data?['friends'] as List<dynamic>? ?? [];
 
       setState(() {
-        _friendIds = friends.map((f) => f.toString()).toList();
+        _friendIds = [
+          widget.userId, // include self
+          ...friends.map((f) => f.toString()),
+        ];
         _loadingFriends = false;
       });
     } catch (e) {

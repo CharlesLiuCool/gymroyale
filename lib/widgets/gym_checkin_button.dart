@@ -133,20 +133,23 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
             ? DateTime(lastCheckIn.year, lastCheckIn.month, lastCheckIn.day)
             : null;
 
-    int newStreak = 1;
+    int newStreak;
 
-    if (lastDate != null) {
+    if (lastDate == null) {
+      // First ever check-in
+      newStreak = 1;
+    } else {
       final diff = today.difference(lastDate).inDays;
 
-      if (diff == 1) {
-        // Checked in yesterday, increment streak
-        newStreak = (data?['streakCount'] ?? 0) + 1;
-      } else if (diff == 0) {
-        // Already checked in today, keep current streak
+      if (diff == 0) {
+        // Already checked in today
         newStreak = data?['streakCount'] ?? 1;
-      } else if (diff > 1) {
-        // Missed one or more days, reset streak
-        newStreak = 1;
+      } else if (diff == 1) {
+        // Checked in yesterday
+        newStreak = (data?['streakCount'] ?? 0) + 1;
+      } else {
+        // 48+ hours passed
+        newStreak = 0;
       }
     }
 

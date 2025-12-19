@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gymroyale/repositories/leaderboard_repository.dart';
 import 'package:gymroyale/widgets/leaderboard.dart';
 import 'package:gymroyale/theme/app_colors.dart';
 import 'package:gymroyale/widgets/add_friends.dart';
+import 'package:gymroyale/models/user.dart';
 
 class LeaderboardTab extends StatefulWidget {
   final String userId;
@@ -18,44 +18,38 @@ class LeaderboardTab extends StatefulWidget {
 class _LeaderboardTabState extends State<LeaderboardTab> {
   List<String> _friendIds = [];
   bool _loadingFriends = true;
+  User? _currentUser;
 
   @override
   void initState() {
     super.initState();
-    _loadFriends();
+    _loadCurrentUser(); // reactive listener handles both current user and friends
   }
 
-  Future<void> _loadFriends() async {
-    setState(() => _loadingFriends = true);
-    try {
-      final doc =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(widget.userId)
-              .get();
-
-      final data = doc.data();
-      final friends = data?['friends'] as List<dynamic>? ?? [];
+  /// Listen to the current user's document in real-time
+  void _loadCurrentUser() {
+    widget.repo.watchUser(widget.userId).listen((user) {
+      if (user == null) return;
 
       setState(() {
+        _currentUser = user;
         _friendIds = [
           widget.userId, // include self
-          ...friends.map((f) => f.toString()),
+          ...user.friends,
         ];
         _loadingFriends = false;
       });
-    } catch (e) {
-      setState(() => _loadingFriends = false);
-      // optionally show error
-      print("Failed to load friends: $e");
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_currentUser == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.accent,
         onPressed: () async {
@@ -65,12 +59,10 @@ class _LeaderboardTabState extends State<LeaderboardTab> {
               builder: (_) => AddFriendsPage(userId: widget.userId),
             ),
           );
-          // Reload friends after coming back
-          _loadFriends();
+          // No need to reload friends manually; listener updates automatically
         },
         child: const Icon(Icons.person_add, color: Colors.black),
       ),
-
       body: SafeArea(
         child: DefaultTabController(
           length: 2, // Global + Friends
@@ -108,7 +100,10 @@ class _LeaderboardTabState extends State<LeaderboardTab> {
                         horizontal: 16,
                         vertical: 8,
                       ),
-                      child: Leaderboard(repo: widget.repo),
+                      child: Leaderboard(
+                        repo: widget.repo,
+                        currentUser: _currentUser!,
+                      ),
                     ),
 
                     // FRIENDS TAB
@@ -121,7 +116,8 @@ class _LeaderboardTabState extends State<LeaderboardTab> {
                           ),
                           child: Leaderboard(
                             repo: widget.repo,
-                            filterIds: _friendIds, // pass friend IDs to filter
+                            currentUser: _currentUser!,
+                            filterIds: _friendIds, // filter friend IDs
                           ),
                         ),
                   ],

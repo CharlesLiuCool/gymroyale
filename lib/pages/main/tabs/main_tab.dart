@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gymroyale/models/workout_activity.dart';
+import 'package:gymroyale/models/user.dart';
 import 'package:gymroyale/repositories/leaderboard_repository.dart';
 import 'package:gymroyale/repositories/workout_repository.dart';
 import 'package:gymroyale/widgets/gym_checkin_button.dart';
 import 'package:gymroyale/widgets/leaderboard.dart';
 import 'package:gymroyale/widgets/workout_card.dart';
-import 'package:gymroyale/theme/app_colors.dart';
 import 'package:gymroyale/widgets/workout_form.dart';
+import 'package:gymroyale/theme/app_colors.dart';
 
 class MainTab extends StatelessWidget {
   final String userId;
@@ -16,130 +17,147 @@ class MainTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ---------- LEADERBOARD ----------
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Text(
-              'Leaderboard',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
+    return StreamBuilder<User?>(
+      stream: repo.watchUser(userId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.accent),
+          );
+        }
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Leaderboard(repo: repo),
-          ),
+        final currentUser = snapshot.data!;
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            child: GymCheckInButton(userId: userId, repo: repo),
-          ),
-
-          // ---------- WORKOUT SECTION ----------
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: Text(
-              'Workouts',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ),
-
-          Expanded(
-            child: Stack(
-              children: [
-                StreamBuilder<List<WorkoutActivity>>(
-                  stream: WorkoutRepository().watchUserWorkouts(userId),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.accent,
-                        ),
-                      );
-                    }
-
-                    final workouts = snapshot.data!;
-
-                    if (workouts.isEmpty) {
-                      return const Center(
-                        child: Text(
-                          'No workouts yet',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 16,
-                          ),
-                        ),
-                      );
-                    }
-
-                    return ListView.separated(
-                      key: const PageStorageKey("main_tab_workouts"),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
-                      itemCount: workouts.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final activity = workouts[index];
-                        return WorkoutCard(
-                          activity: activity,
-                          onDelete:
-                              () => WorkoutRepository().deleteWorkout(
-                                userId,
-                                activity.id,
-                              ),
-                          onEdit: () {
-                            // Open general WorkoutForm in a modal sheet for editing
-                            showWorkoutSheet(
-                              context,
-                              userId,
-                              workout: activity,
-                              onSaved: () {
-                                // no extra logic needed since StreamBuilder auto-updates
-                              },
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
-
-                // ---------- ADD WORKOUT BUTTON ----------
-                Positioned(
-                  bottom: 16,
-                  right: 16,
-                  child: FloatingActionButton(
-                    backgroundColor: AppColors.accent,
-                    child: const Icon(Icons.add, color: Colors.white),
-                    onPressed: () {
-                      showWorkoutSheet(
-                        context,
-                        userId,
-                        onSaved: () {
-                          // StreamBuilder updates automatically
-                        },
-                      );
-                    },
+        return SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // ---------- LEADERBOARD ----------
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
+                child: Text(
+                  'Leaderboard',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
-              ],
-            ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
+                child: Leaderboard(repo: repo, currentUser: currentUser),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
+                child: GymCheckInButton(userId: userId, repo: repo),
+              ),
+
+              // ---------- WORKOUT SECTION ----------
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: Text(
+                  'Workouts',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+
+              Expanded(
+                child: Stack(
+                  children: [
+                    _WorkoutList(userId: userId),
+                    _AddWorkoutButton(userId: userId),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        );
+      },
+    );
+  }
+}
+
+class _WorkoutList extends StatelessWidget {
+  final String userId;
+  const _WorkoutList({required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<WorkoutActivity>>(
+      stream: WorkoutRepository().watchUserWorkouts(userId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.accent),
+          );
+        }
+
+        final workouts = snapshot.data!;
+
+        if (workouts.isEmpty) {
+          return const Center(
+            child: Text(
+              'No workouts yet',
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          key: const PageStorageKey("main_tab_workouts"),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          itemCount: workouts.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final activity = workouts[index];
+            return WorkoutCard(
+              activity: activity,
+              onDelete:
+                  () => WorkoutRepository().deleteWorkout(userId, activity.id),
+              onEdit: () {
+                showWorkoutSheet(
+                  context,
+                  userId,
+                  workout: activity,
+                  onSaved: () {}, // StreamBuilder auto-updates
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _AddWorkoutButton extends StatelessWidget {
+  final String userId;
+  const _AddWorkoutButton({required this.userId});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 16,
+      right: 16,
+      child: FloatingActionButton(
+        backgroundColor: AppColors.accent,
+        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: () {
+          showWorkoutSheet(context, userId, onSaved: () {});
+        },
       ),
     );
   }

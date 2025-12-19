@@ -29,6 +29,14 @@ class LeaderboardRepository {
     });
   }
 
+  /// Watch a specific user by their userId
+  Stream<User?> watchUser(String userId) {
+    return _users.doc(userId).snapshots().map((doc) {
+      if (!doc.exists) return null;
+      return User.fromMap(doc.data()!, doc.id);
+    });
+  }
+
   /// Stream of top users ordered by points
   Stream<List<User>> topUsers({int limit = 20}) {
     return _users
@@ -93,6 +101,22 @@ class LeaderboardRepository {
 
   Future<void> updateUsername(String userId, String newName) async {
     await _users.doc(userId).update({'name': newName});
+  }
+
+  /// Add a friend to the current user's friends list
+  Future<void> addFriend(String currentUserId, String friendId) async {
+    final ref = _users.doc(currentUserId);
+    await ref.update({
+      'friends': FieldValue.arrayUnion([friendId]),
+    });
+  }
+
+  /// Remove a friend from the current user's friends list
+  Future<void> removeFriend(String currentUserId, String friendId) async {
+    final ref = _users.doc(currentUserId);
+    await ref.update({
+      'friends': FieldValue.arrayRemove([friendId]),
+    });
   }
 
   /// Stream of history entries for each user

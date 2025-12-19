@@ -3,13 +3,14 @@ import 'package:geolocator/geolocator.dart';
 import '../repositories/leaderboard_repository.dart';
 import '../theme/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/streak_service.dart';
 
 // CONFIG:
 // Minimum distance in meters to be considered "at the gym"
 // Easy to toggle for testing
 const double minDistance = 200;
 // Disable gym checkin for testing
-const bool disableCheck = true;
+const bool disableCheck = false;
 
 class GymCheckInButton extends StatefulWidget {
   final String userId;
@@ -117,45 +118,6 @@ class _GymCheckInButtonState extends State<GymCheckInButton> {
         ),
       );
     }
-  }
-
-  Future<int> updateStreak(String userId) async {
-    final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
-    final doc = await userRef.get();
-    final data = doc.data();
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    final lastCheckIn = (data?['lastCheckIn'] as Timestamp?)?.toDate();
-    final lastDate =
-        lastCheckIn != null
-            ? DateTime(lastCheckIn.year, lastCheckIn.month, lastCheckIn.day)
-            : null;
-
-    int newStreak = 1;
-
-    if (lastDate != null) {
-      final diff = today.difference(lastDate).inDays;
-
-      if (diff == 1) {
-        // Checked in yesterday, increment streak
-        newStreak = (data?['streakCount'] ?? 0) + 1;
-      } else if (diff == 0) {
-        // Already checked in today, keep current streak
-        newStreak = data?['streakCount'] ?? 1;
-      } else if (diff > 1) {
-        // Missed one or more days, reset streak
-        newStreak = 1;
-      }
-    }
-
-    await userRef.update({
-      'streakCount': newStreak,
-      'lastCheckIn': Timestamp.fromDate(now),
-    });
-
-    return newStreak;
   }
 
   @override

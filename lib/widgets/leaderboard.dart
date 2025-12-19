@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 import 'leaderboard_row.dart';
 import '../theme/app_colors.dart';
+import 'package:gymroyale/pages/main/settings/profile_page.dart';
 import 'dart:math' as math;
 
 class Leaderboard extends StatefulWidget {
   final double initialHeight;
   final double expandedHeight;
   final dynamic repo;
+
+  final User currentUser;
+
   final List<String>? filterIds;
 
   const Leaderboard({
@@ -15,6 +19,7 @@ class Leaderboard extends StatefulWidget {
     this.initialHeight = 180,
     this.expandedHeight = 400,
     required this.repo,
+    required this.currentUser,
     this.filterIds,
   });
 
@@ -29,12 +34,9 @@ class _LeaderboardState extends State<Leaderboard> {
   void _toggleExpanded(List<User> users, double rowHeight) {
     setState(() => _expanded = !_expanded);
 
-    // Scroll to current user *after* expanding
     if (_expanded) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final index = users.indexWhere(
-          (u) => u.id == widget.repo.currentUserId,
-        );
+        final index = users.indexWhere((u) => u.id == widget.currentUser.id);
 
         if (index != -1) {
           _scrollController.animateTo(
@@ -49,7 +51,7 @@ class _LeaderboardState extends State<Leaderboard> {
 
   @override
   Widget build(BuildContext context) {
-    final double rowHeight = 60.0;
+    const double rowHeight = 60.0;
 
     return StreamBuilder<List<User>>(
       stream: widget.repo.topUsers(limit: 20),
@@ -67,7 +69,6 @@ class _LeaderboardState extends State<Leaderboard> {
           );
         }
 
-        // Filter by friend list when provided
         final users =
             widget.filterIds != null
                 ? snapshot.data!
@@ -110,8 +111,7 @@ class _LeaderboardState extends State<Leaderboard> {
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     final user = users[index];
-                    final isCurrent =
-                        user.id == widget.repo.currentUserId; // highlight me
+                    final isCurrent = user.id == widget.currentUser.id;
 
                     return SizedBox(
                       height: rowHeight,
@@ -119,6 +119,29 @@ class _LeaderboardState extends State<Leaderboard> {
                         user: user,
                         rank: index + 1,
                         isCurrentUser: isCurrent,
+                        isFriend: widget.currentUser.friends.contains(user.id),
+
+                        onViewProfile: () {
+                          Navigator.push(
+                            context,
+                            // FUTURE: Replace with user-specific profile page
+                            MaterialPageRoute(builder: (_) => ProfilePage()),
+                          );
+                        },
+
+                        onAddFriend: () async {
+                          await widget.repo.addFriend(
+                            widget.currentUser.id,
+                            user.id,
+                          );
+                        },
+
+                        onRemoveFriend: () async {
+                          await widget.repo.removeFriend(
+                            widget.currentUser.id,
+                            user.id,
+                          );
+                        },
                       ),
                     );
                   },
@@ -126,7 +149,6 @@ class _LeaderboardState extends State<Leaderboard> {
               ),
             ),
 
-            // Show toggler only when there is something to expand
             if (users.length >= 4)
               TextButton(
                 onPressed: () => _toggleExpanded(users, rowHeight),
